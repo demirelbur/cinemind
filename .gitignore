@@ -52,6 +52,7 @@ coverage.xml
 # Environments and local configuration
 .env
 .env.*
+!.env.example
 *.env
 .venv/
 venv/

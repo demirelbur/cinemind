@@ -6,3 +6,14 @@ Build **CineMind**, an LLM-based movie recommender that:
 - retrieves matching movies from a PostgreSQL database
 - uses an LLM to rank and explain recommendations
 - returns structured recommendations in a strict schema
+
+## External/API-facing
+
+- `RecommendRequest`
+- `RecommendationResponse`
+
+## Internal Domain
+
+- `ParsedPreferences`
+- `MovieRecord`
+- `MovieRecommendation`
