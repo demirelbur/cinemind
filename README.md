@@ -143,3 +143,10 @@ Think in terms of boundaries:
 ---
 
 We should create a small yet disiplined test campaing for intent parser.
+
+---
+
+- keep your current **intent parser agent**
+- add a deterministic **PostgreSQL retrieval service**
+- wrap both in one **Intent + Retrieval orchestration layer**
+- return a typed `RetrievalResult`
