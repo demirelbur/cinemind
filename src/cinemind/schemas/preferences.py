@@ -5,77 +5,114 @@ from cinemind.schemas.movie import AudienceLiteral, GenreLiteral
 
 
 class ParsedPreferences(StrictBaseModel):
-    """Structured representation of user preferences extracted from natural language."""
+    """
+    Structured representation of user intent extracted from natural-language queries.
 
+    This model is produced by the intent parser agent and used by the retrieval layer.
+    """
+
+    # Core filters (directly used for SQL filtering)
     genre: GenreLiteral | None = Field(
         default=None,
-        description="Preferred primary genre, if explicitly or implicitly identified.",
+        description="Preferred primary genre explicitly or implicitly requested by the user.",
     )
+
     min_year: int | None = Field(
         default=None,
         ge=1900,
         le=2025,
-        description="Minimum preferred release year.",
+        description="Minimum preferred release year inferred from the query (e.g., 'after 2010').",
     )
+
     max_year: int | None = Field(
         default=None,
         ge=1900,
         le=2025,
-        description="Maximum preferred release year.",
+        description="Maximum preferred release year inferred from the query (e.g., 'before 2000').",
     )
+
     min_rating: float | None = Field(
         default=None,
         ge=0.0,
         le=10.0,
-        description="Minimum preferred rating threshold.",
+        description="Minimum rating threshold inferred from phrases like 'highly rated'.",
     )
+
     recommended_for: AudienceLiteral | None = Field(
         default=None,
-        description="Preferred audience category, if inferred from the query.",
+        description="Target audience inferred from the query (e.g., 'family movie', 'for kids').",
     )
-    mood: str | None = Field(
-        default=None,
-        description="Free-text mood or tone preference, such as 'dark' or 'uplifting'.",
-    )
-    themes: list[str] = Field(
-        default_factory=list,
-        description="Free-text thematic preferences, such as 'space', 'friendship', or 'revenge'.",
-    )
+
     exclude_genres: list[GenreLiteral] = Field(
         default_factory=list,
-        description="Genres the user wants to avoid.",
+        description="Genres the user explicitly wants to avoid.",
     )
+
+    # Soft / semantic preferences (not directly used in SQL yet)
+    mood: str | None = Field(
+        default=None,
+        description="Tone or mood preference such as 'dark', 'light-hearted', or 'emotional'.",
+    )
+
+    themes: list[str] = Field(
+        default_factory=list,
+        description="Free-text thematic preferences such as 'space', 'friendship', or 'revenge'.",
+    )
+
+    # Result control (inferred from user language, not API input)
+    desired_results: int | None = Field(
+        default=None,
+        ge=1,
+        le=10,
+        description=(
+            "Desired number of recommendations inferred from the user's query "
+            "(e.g., 'top ten movies', 'give me 3 options')."
+        ),
+    )
+
+    # -------------------------
+    # Validators
+    # -------------------------
 
     @field_validator("mood", mode="before")
     @classmethod
-    def normalize_mood(cls, value: object) -> object:
-        """Collapse repeated whitespace and convert empty strings to None."""
+    def normalize_mood(cls, value):
         if value is None:
             return None
         if isinstance(value, str):
-            normalized = " ".join(value.split())
-            return normalized or None
+            value = " ".join(value.split())
+            return value or None
         return value
 
     @field_validator("themes", mode="before")
     @classmethod
-    def normalize_themes(cls, value: object) -> list[str] | object:
-        """Normalize theme strings and drop empty entries."""
+    def normalize_themes(cls, value):
         if value is None:
             return []
         if isinstance(value, list):
             cleaned: list[str] = []
             for item in value:
                 if isinstance(item, str):
-                    normalized = " ".join(item.split())
-                    if normalized:
-                        cleaned.append(normalized)
+                    item = " ".join(item.split())
+                    if item:
+                        cleaned.append(item)
             return cleaned
         return value
 
+    @field_validator("exclude_genres", mode="before")
+    @classmethod
+    def normalize_exclude_genres(cls, value):
+        if value is None:
+            return []
+        if isinstance(value, list):
+            return list(dict.fromkeys(value))  # remove duplicates, preserve order
+        return value
+
     @model_validator(mode="after")
-    def validate_year_range(self) -> "ParsedPreferences":
-        """Ensure the minimum year does not exceed the maximum year."""
+    def validate_year_range(self):
+        """
+        Ensure min_year <= max_year when both are provided.
+        """
         if (
             self.min_year is not None
             and self.max_year is not None

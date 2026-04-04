@@ -24,11 +24,11 @@ package = true
 cinemind = { path = "src/cinemind", editable = true }
 
 [dependency-groups]
-dev = [
-    "mypy>=1.20.0",
-    "pytest>=9.0.2",
-    "ruff>=0.15.9",
-]
+dev = ["mypy>=1.20.0", "pytest>=9.0.2", "ruff>=0.15.9"]
+
+[tool.pytest.ini_options]
+markers = ["llm: tests that require a live LLM call"]
+testpaths = ["tests"]
 
 [build-system]
 requires = ["uv_build>=0.11.2,<0.12.0"]

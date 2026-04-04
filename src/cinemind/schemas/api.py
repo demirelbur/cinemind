@@ -13,11 +13,14 @@ class RecommendRequest(StrictBaseModel):
         max_length=500,
         description="Natural-language movie preference provided by the user.",
     )
-    max_results: int = Field(
-        default=5,
+    max_results: int | None = Field(
+        default=None,
         ge=1,
         le=10,
-        description="Maximum number of recommendations to return.",
+        description=(
+            "Optional override for the number of recommendations to return. "
+            "If omitted, the system may infer it from the query or use a default."
+        ),
     )
 
 

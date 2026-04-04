@@ -7,7 +7,6 @@ from cinemind.schemas.preferences import ParsedPreferences
 
 load_dotenv()
 
-
 intent_parser_agent = Agent(
     "openrouter:openai/gpt-4o",
     name="intent_parser_agent",
@@ -29,12 +28,3 @@ def parse_preferences(request: RecommendRequest) -> ParsedPreferences:
 
     result = intent_parser_agent.run_sync(prompt)
     return result.output
-
-
-if __name__ == "__main__":
-    out = parse_preferences(
-        RecommendRequest(
-            query="Can you recommend some good sci-fi movies from the 80s that are suitable for teens? I want at least 5 options."
-        )  # .model_validate_json
-    )
-    print(out.model_dump_json(indent=2))

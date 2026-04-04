@@ -118,5 +118,28 @@ psql -U cinemind_user -d cinemind
 
 If it connects, perfect.
 
+---
 
+Best validation mindset for CineMind
 
+Think in terms of boundaries:
+
+- Boundary 1 — external input
+
+    Validate `RecommendRequest`
+
+- Boundary 2 — LLM structured output
+
+    Validate `ParsedPreferences`
+
+- Boundary 3 — DB retrieval output
+
+    Validate or construct `MovieRecord`
+
+- Boundary 4 — final recommender output
+
+    Validate `RecommendationResponse`
+
+---
+
+We should create a small yet disiplined test campaing for intent parser.
