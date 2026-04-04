@@ -150,3 +150,24 @@ We should create a small yet disiplined test campaing for intent parser.
 - add a deterministic **PostgreSQL retrieval service**
 - wrap both in one **Intent + Retrieval orchestration layer**
 - return a typed `RetrievalResult`
+
+---
+
+## What Agent 2 should do?
+
+Input:
+
+- original user query
+- `RetrievalResult`
+- resolved final count
+
+Output:
+
+- `RecommendationResponse`
+
+Responsibilities:
+
+- stay grounded in provided candidates only
+- pick the strongest matches to the user's query
+- generate short, useful reasons
+- return structured output

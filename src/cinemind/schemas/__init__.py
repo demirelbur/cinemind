@@ -6,6 +6,7 @@ from cinemind.schemas.movie import (
     MovieRecord,
 )
 from cinemind.schemas.preferences import ParsedPreferences
+from cinemind.schemas.recommendation import RecommendationContext
 from cinemind.schemas.retrieval import RetrievalResult
 
 __all__ = [
@@ -14,7 +15,8 @@ __all__ = [
     "MovieRecord",
     "MovieRecommendation",
     "ParsedPreferences",
-    "RetrievalResult",
+    "RecommendationContext",
     "RecommendRequest",
     "RecommendationResponse",
+    "RetrievalResult",
 ]

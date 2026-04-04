@@ -5,11 +5,10 @@ import json
 from pathlib import Path
 from typing import Any
 
-import pandas as pd
+import pandas as pd  # type: ignore
 from pydantic import ValidationError
 
 from cinemind.schemas.movie import MovieRecord
-
 
 RAW_DIR = Path("data/raw")
 PROCESSED_DIR = Path("data/processed")
@@ -179,7 +178,11 @@ def infer_audience(genres_raw: Any) -> str | None:
     if "Horror" in genre_names or "Thriller" in genre_names:
         return "adults"
 
-    if "Action" in genre_names or "Science Fiction" in genre_names or "Drama" in genre_names:
+    if (
+        "Action" in genre_names
+        or "Science Fiction" in genre_names
+        or "Drama" in genre_names
+    ):
         return "teens"
 
     if "Comedy" in genre_names or "Romance" in genre_names:
