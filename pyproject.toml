@@ -3,6 +3,7 @@ name = "cinemind"
 version = "0.1.0"
 description = "LLM-powered movie recommendation system"
 readme = "README.md"
+license = { file = "LICENSE" }
 requires-python = ">=3.11"
 dependencies = [
     "alembic>=1.18.4",
