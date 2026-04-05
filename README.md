@@ -7,6 +7,8 @@ Build **CineMind**, an LLM-based movie recommender that:
 - uses an LLM to rank and explain recommendations
 - returns structured recommendations in a strict schema
 
+![CineMind](images/cinemind-version.png)
+
 ## External/API-facing
 
 - `RecommendRequest`
