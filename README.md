@@ -43,6 +43,8 @@ Start backend:
 uv run uvicorn cinemind.api.main:app --reload
 ```
 
+This repository is intentionally dev-first; the `--reload` workflow is used on purpose for local iteration speed.
+
 Start frontend:
 
 ```bash
