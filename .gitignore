@@ -78,3 +78,7 @@ Thumbs.db
 
 # UV local lockfile (commonly ignored for libraries)
 uv.lock
+
+# Dataset files (keep local, do not commit)
+data/*
+!data/.gitkeep
