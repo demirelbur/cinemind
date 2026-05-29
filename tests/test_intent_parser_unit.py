@@ -35,9 +35,11 @@ def test_parse_preferences_returns_agent_output(monkeypatch):
         assert "User query: Recommend a good comedy movie from the 90s." in prompt
         return SimpleNamespace(output=expected)
 
+    fake_agent = SimpleNamespace(run_sync=fake_run_sync)
+
     monkeypatch.setattr(
-        "cinemind.agents.intent_parser_agent.intent_parser_agent.run_sync",
-        fake_run_sync,
+        "cinemind.agents.intent_parser_agent.get_intent_parser_agent",
+        lambda: fake_agent,
     )
 
     request = RecommendRequest(query="Recommend a good comedy movie from the 90s.")
@@ -57,9 +59,11 @@ def test_parse_preferences_includes_api_max_results_in_prompt(monkeypatch):
         )
         return SimpleNamespace(output=expected)
 
+    fake_agent = SimpleNamespace(run_sync=fake_run_sync)
+
     monkeypatch.setattr(
-        "cinemind.agents.intent_parser_agent.intent_parser_agent.run_sync",
-        fake_run_sync,
+        "cinemind.agents.intent_parser_agent.get_intent_parser_agent",
+        lambda: fake_agent,
     )
 
     request = RecommendRequest(
