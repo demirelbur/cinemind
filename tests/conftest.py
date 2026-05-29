@@ -1,6 +1,9 @@
 import pytest
 
+from cinemind.core.config import get_settings
 from cinemind.schemas.preferences import ParsedPreferences
+
+get_settings()
 
 
 @pytest.fixture

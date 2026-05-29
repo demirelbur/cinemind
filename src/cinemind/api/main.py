@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 
 from cinemind.api.routes import router
-from cinemind.core.config import load_dotenv
+from cinemind.core.config import get_settings
 
-load_dotenv()
+get_settings()
 
 app = FastAPI(
     title="Cinemind API",

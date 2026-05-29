@@ -1,14 +1,13 @@
-import os
 from typing import Any
 
 import requests
 import streamlit as st
-from dotenv import load_dotenv
 
-load_dotenv()
+from cinemind.core.config import get_settings
 
-API_BASE_URL = os.getenv("CINEMIND_API_BASE_URL", "http://127.0.0.1:8000")
-RECOMMEND_ENDPOINT = f"{API_BASE_URL}/recommend"
+_settings = get_settings()
+RECOMMEND_ENDPOINT = f"{_settings.cinemind_api_base_url}/recommend"
+API_BASE_URL = _settings.cinemind_api_base_url
 DEFAULT_MAX_RESULTS = 5
 REQUEST_TIMEOUT_SECONDS = 60
 

@@ -1,22 +1,29 @@
-from dotenv import load_dotenv
-from pydantic_ai import Agent
+from functools import cache
 
+from pydantic_ai import Agent
+from pydantic_ai.models.openrouter import OpenRouterModel
+
+from cinemind.core.config import get_settings
 from cinemind.prompts import RECOMMENDATION_AGENT_SYSTEM_PROMPT
 from cinemind.schemas.api import RecommendationResponse
 from cinemind.schemas.recommendation import RecommendationContext
 
-load_dotenv()
 
-
-recommendation_agent = Agent(
-    "openrouter:openai/gpt-4o",
-    name="recommendation_agent",
-    description="Ranks and explains movie recommendations from candidate movies.",
-    output_type=RecommendationResponse,
-    defer_model_check=True,
-    system_prompt=RECOMMENDATION_AGENT_SYSTEM_PROMPT,
-    retries=2,
-)
+@cache
+def get_recommendation_agent() -> Agent:
+    settings = get_settings()
+    model = OpenRouterModel(
+        settings.llm_model_name,
+        provider=settings.llm_provider,
+    )
+    return Agent(
+        model,
+        name="recommendation_agent",
+        description="Ranks and explains movie recommendations from candidate movies.",
+        output_type=RecommendationResponse,
+        system_prompt=RECOMMENDATION_AGENT_SYSTEM_PROMPT,
+        retries=2,
+    )
 
 
 def recommend_movies(context: RecommendationContext) -> RecommendationResponse:
@@ -42,7 +49,7 @@ def recommend_movies(context: RecommendationContext) -> RecommendationResponse:
         "Return a RecommendationResponse using ONLY the candidate movies."
     )
 
-    result = recommendation_agent.run_sync(prompt)
+    result = get_recommendation_agent().run_sync(prompt)
 
     response: RecommendationResponse = result.output
 
