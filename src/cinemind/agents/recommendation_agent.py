@@ -2,6 +2,7 @@ from functools import cache
 
 from pydantic_ai import Agent
 from pydantic_ai.models.openrouter import OpenRouterModel
+from pydantic_ai.providers.openrouter import OpenRouterProvider
 
 from cinemind.core.config import get_settings
 from cinemind.prompts import RECOMMENDATION_AGENT_SYSTEM_PROMPT
@@ -12,9 +13,10 @@ from cinemind.schemas.recommendation import RecommendationContext
 @cache
 def get_recommendation_agent() -> Agent:
     settings = get_settings()
+    provider = OpenRouterProvider(api_key=settings.openrouter_api_key)
     model = OpenRouterModel(
         settings.llm_model_name,
-        provider=settings.llm_provider,
+        provider=provider,
     )
     return Agent(
         model,

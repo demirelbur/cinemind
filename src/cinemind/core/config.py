@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
     database_url: str = Field(default="", alias="DATABASE_URL")
+    openrouter_api_key: str = Field(default="", alias="OPENROUTER_API_KEY")
     llm_provider: str = Field(default="openrouter", alias="LLM_PROVIDER")
     llm_model_name: str = Field(default="openai/gpt-4o", alias="LLM_MODEL_NAME")
     cinemind_api_base_url: str = Field(

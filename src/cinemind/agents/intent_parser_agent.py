@@ -2,6 +2,7 @@ from functools import cache
 
 from pydantic_ai import Agent
 from pydantic_ai.models.openrouter import OpenRouterModel
+from pydantic_ai.providers.openrouter import OpenRouterProvider
 
 from cinemind.core.config import get_settings
 from cinemind.prompts import INTENT_PARSER_SYSTEM_PROMPT
@@ -12,9 +13,10 @@ from cinemind.schemas.preferences import ParsedPreferences
 @cache
 def get_intent_parser_agent() -> Agent:
     settings = get_settings()
+    provider = OpenRouterProvider(api_key=settings.openrouter_api_key)
     model = OpenRouterModel(
         settings.llm_model_name,
-        provider=settings.llm_provider,
+        provider=provider,
     )
     return Agent(
         model,
@@ -23,6 +25,18 @@ def get_intent_parser_agent() -> Agent:
         output_type=str,
         system_prompt=INTENT_PARSER_SYSTEM_PROMPT,
     )
+
+
+def _extract_json(text: str) -> str:
+    """Strip markdown code fences from LLM JSON output."""
+    text = text.strip()
+    if text.startswith("```"):
+        lines = text.split("\n")
+        lines = lines[1:] if lines[0].startswith("```") else lines
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        text = "\n".join(lines).strip()
+    return text
 
 
 def parse_preferences(request: RecommendRequest) -> ParsedPreferences:
@@ -37,5 +51,6 @@ def parse_preferences(request: RecommendRequest) -> ParsedPreferences:
     result = agent.run_sync(prompt)
     output = result.output
     if isinstance(output, str):
-        return ParsedPreferences.parse_raw(output)
-    return ParsedPreferences.parse_obj(output)
+        cleaned = _extract_json(output)
+        return ParsedPreferences.model_validate_json(cleaned)
+    return ParsedPreferences.model_validate(output)

@@ -1,0 +1,68 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging artifacts
+build/
+dist/
+*.egg-info/
+
+# Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Local configuration (copied into container at runtime)
+.env
+.env.*
+!.env.example
+
+# IDE / editor
+.vscode/
+.idea/
+*.iml
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test / coverage
+htmlcov/
+.coverage
+.coverage.*
+.pytest_cache/
+.hypothesis/
+nosetests.xml
+coverage.xml
+*.cover
+
+# Type checkers and linters
+.mypy_cache/
+.pyre/
+.pytype/
+.ruff_cache/
+
+# Test / coverage (moved here from above)
+# UV lock is needed for uv sync --frozen in Docker
+
+# Data — needed for load_movies.py seeding in Docker
+# data/*
+# !data/.gitkeep
+
+# Git
+.git/
+.gitignore
+
+# Documentation / non-essential (but keep pyproject.toml references)
+*.md
+!README.md
+
+# Docker artifacts
+Dockerfile
+docker-compose*.yml
+.dockerignore

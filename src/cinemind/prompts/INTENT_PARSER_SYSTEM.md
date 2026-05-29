@@ -111,4 +111,4 @@ Return only structured data that matches the `ParsedPreferences` schema.
 - Do not over-interpret vague language.
 - If the query is broad, it is acceptable for many fields to remain `null` or empty.
 
-Return only the structured `ParsedPreferences` result.
+Return only the structured `ParsedPreferences` result as raw JSON. Do not wrap in markdown code blocks or add any prose.

@@ -23,38 +23,95 @@ CineMind uses a two-agent orchestration flow:
 
 This design keeps recommendations explainable and testable while still benefiting from LLM flexibility.
 
-## ⬇️ Installation
+## ⬇️ Installation & Quick Start
 
-Minimum requirement: Python 3.11+
+CineMind can be run in two ways: **Docker Compose** (recommended) or **locally** with `uv`.
 
-Install dependencies:
+### Option 1: Docker Compose (Recommended)
+
+Requires Docker and Docker Compose. This starts PostgreSQL, the FastAPI backend, and the Streamlit frontend in one command.
 
 ```bash
+# Set your OpenRouter API key
+export OPENROUTER_API_KEY="your-key-here"
+
+# Start all services
+docker compose up -d
+
+# Check status
+docker compose ps
+
+# View logs
+docker compose logs -f
+```
+
+Access the app:
+
+- **Frontend**: <http://localhost:8501>
+- **API**: <http://localhost:8000>
+- **API Docs (Swagger)**: <http://localhost:8000/docs>
+
+Stop services:
+
+```bash
+docker compose down
+```
+
+### Option 2: Local Development
+
+Minimum requirements: Python 3.11+, PostgreSQL running locally (port 5432).
+
+```bash
+# 1. Install dependencies
 uv sync
-```
 
-For complete setup, environment variables, migrations, and local run steps, see [docs/quickstart.md](docs/quickstart.md).
+# 2. Ensure PostgreSQL is running with database `cinemind_db`
+#    See [docs/postgresql_setup.md](docs/postgresql_setup.md) for macOS setup
 
-## 🚀 Usage
+# 3. Run database migrations
+uv run alembic upgrade head
 
-Start backend:
+# 4. Load movie seed data
+uv run python scripts/load_movies.py
 
-```bash
+# 5a. Start FastAPI backend (terminal 1)
 uv run uvicorn cinemind.api.main:app --reload
-```
 
-This repository is intentionally dev-first; the `--reload` workflow is used on purpose for local iteration speed.
-
-Start frontend:
-
-```bash
+# 5b. Start Streamlit frontend (terminal 2)
 uv run streamlit run src/cinemind/frontend/app.py
 ```
 
-Then ask for recommendations in natural language, for example:
+Access the app at:
+
+- **Frontend**: <http://localhost:8501>
+- **API**: <http://localhost:8000>
+
+## 🚀 Usage
+
+Ask for recommendations in natural language, for example:
 
 - "Give me 3 dark sci-fi movies after 2010."
 - "Recommend a family-friendly movie with no horror."
+
+You can use the Streamlit UI, the Swagger docs at <http://localhost:8000/docs>, or call the API directly:
+
+```bash
+curl -X POST http://localhost:8000/recommend \
+  -H "Content-Type: application/json" \
+  -d '{"query": "I want a nice comedy about friendship", "max_results": 5}'
+```
+
+## 🔧 Environment Variables
+
+The following must be configured (via `.env` file or environment):
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `OPENROUTER_API_KEY` | yes | — | OpenRouter API key for LLM calls |
+| `DATABASE_URL` | yes | — | PostgreSQL connection string (e.g., `postgresql+psycopg://user:pass@localhost:5432/cinemind_db`) |
+| `LLM_PROVIDER` | no | `openrouter` | Must be the literal string `openrouter` |
+| `LLM_MODEL_NAME` | no | `openai/gpt-4o` | Model name with provider prefix (e.g., `openai/gpt-4o`, `anthropic/claude-sonnet-4-20250514`) |
+| `CINEMIND_API_BASE_URL` | no | `http://127.0.0.1:8000` | Backend URL used by the Streamlit frontend |
 
 ## 📚 Documentation
 
@@ -88,7 +145,7 @@ Questions, ideas, and bug reports are welcome.
 - Hybrid retrieval (filters + vector similarity)
 - Improve reranking with deterministic pre-scoring
 - Add feedback loops
-- Add Docker Compose for one-command local startup
+- Docker Compose for one-command local startup ✅
 
 ## 📄 License
 
