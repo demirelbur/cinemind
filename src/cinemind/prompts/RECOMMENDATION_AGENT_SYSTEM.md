@@ -57,4 +57,3 @@ exactly as they appear — title, genre, year, rating, synopsis, director, lead_
 - Do not include any text outside the structured response.
 
 Return only a valid `RecommendationResponse`.
-

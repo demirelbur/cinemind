@@ -8,11 +8,12 @@ It takes natural-language preferences, parses intent with an LLM, retrieves cand
 
 ## 🌟 Highlights
 
-- Natural-language queries with strict typed responses
+- Natural-language queries with strict typed responses via Pydantic models
 - Two-stage pipeline: intent parsing and grounded recommendation
 - Deterministic PostgreSQL retrieval (no free-form SQL generation)
+- pydantic_ai handles LLM output validation and automatic retries
 - FastAPI backend, Streamlit frontend, pytest-based test strategy
-- Production-minded MVP with clear upgrade path
+- Fully containerized with Docker Compose for one-command startup
 
 ## ℹ️ Overview
 
@@ -27,14 +28,18 @@ This design keeps recommendations explainable and testable while still benefitin
 
 CineMind can be run in two ways: **Docker Compose** (recommended) or **locally** with `uv`.
 
+Before starting, copy `.env.example` to `.env` and set your `OPENROUTER_API_KEY`:
+
+```bash
+cp .env.example .env
+# Edit .env and set OPENROUTER_API_KEY
+```
+
 ### Option 1: Docker Compose (Recommended)
 
 Requires Docker and Docker Compose. This starts PostgreSQL, the FastAPI backend, and the Streamlit frontend in one command.
 
 ```bash
-# Set your OpenRouter API key
-export OPENROUTER_API_KEY="your-key-here"
-
 # Start all services
 docker compose up -d
 
@@ -54,12 +59,15 @@ Access the app:
 Stop services:
 
 ```bash
+# Stop all services
 docker compose down
 ```
 
 ### Option 2: Local Development
 
-Minimum requirements: Python 3.11+, PostgreSQL running locally (port 5432).
+Minimum requirements: Python 3.11+, `uv`, PostgreSQL running locally (port 5432).
+
+Install `uv` if you don't have it: `pip install uv`
 
 ```bash
 # 1. Install dependencies
@@ -99,54 +107,64 @@ curl -X POST http://localhost:8000/recommend \
 ### Example Queries
 
 **Basic genre:**
+
 - "Recommend 3 sci-fi movies"
 - "I want to watch a comedy"
 - "Suggest some horror films"
 
 **Genre + year range:**
+
 - "Sci-fi movies from the 80s"
 - "Comedy movies from the 90s"
 - "Drama films after 2015"
 - "Action movies before 2000"
 
 **Genre + mood / theme:**
+
 - "Dark thriller movies about revenge"
 - "Light-hearted comedies about friendship"
 - "Intense action movies with space themes"
 
 **Audience filter:**
+
 - "Family-friendly sci-fi movies"
 - "Horror movies for adults"
 - "Comedy for kids"
 
 **Highly rated:**
+
 - "Top-rated drama movies"
 - "Highly rated science fiction from the 70s"
 
 **Exclusions:**
+
 - "Drama movies but no romance"
 - "Action films without any comedy"
 
 **Complex multi-signal:**
+
 - "Recommend 3 dark sci-fi movies from the 80s for teens with themes of survival"
 - "I want uplifting comedies for the family, nothing too old"
 - "Give me 5 highly rated thrillers, no horror please"
 
 **Broad / minimal constraints:**
+
 - "Something highly rated"
 - "Recommend me a good movie"
 
 ## 🔧 Environment Variables
 
-The following must be configured (via `.env` file or environment):
+Configure via `.env` file or environment variables:
 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
 | `OPENROUTER_API_KEY` | yes | — | OpenRouter API key for LLM calls |
 | `DATABASE_URL` | yes | — | PostgreSQL connection string (e.g., `postgresql+psycopg://user:pass@localhost:5432/cinemind_db`) |
 | `LLM_PROVIDER` | no | `openrouter` | Must be the literal string `openrouter` |
-| `LLM_MODEL_NAME` | no | `openai/gpt-4o` | Model name with provider prefix (e.g., `openai/gpt-4o`, `anthropic/claude-sonnet-4-20250514`) |
+| `LLM_MODEL_NAME` | no | `openai/gpt-4o` | Model name with provider prefix (e.g., `openai/gpt-4o`) |
 | `CINEMIND_API_BASE_URL` | no | `http://127.0.0.1:8000` | Backend URL used by the Streamlit frontend |
+
+> **Note:** `LLM_MODEL_NAME` must always include the provider prefix (e.g., `openai/gpt-4o`, `anthropic/claude-sonnet-4-20250514`). A bare name like `gpt-4o` will cause a startup error.
 
 ## 📚 Documentation
 
@@ -176,11 +194,17 @@ Questions, ideas, and bug reports are welcome.
 
 ## 🗺️ Roadmap
 
+**Completed:**
+
+- Docker Compose for one-command local startup
+- Pydantic AI schema-validated outputs with automatic retries
+
+**Planned:**
+
 - Add `pgvector` for semantic search
 - Hybrid retrieval (filters + vector similarity)
 - Improve reranking with deterministic pre-scoring
 - Add feedback loops
-- Docker Compose for one-command local startup ✅
 
 ## 📄 License
 
