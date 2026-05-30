@@ -110,5 +110,5 @@ Return only structured data that matches the `ParsedPreferences` schema.
 - The output must be minimal and grounded in the query.
 - Do not over-interpret vague language.
 - If the query is broad, it is acceptable for many fields to remain `null` or empty.
-
-Return only the structured `ParsedPreferences` result as raw JSON. Do not wrap in markdown code blocks or add any prose.
+- Only use the supported genre and audience values listed above.
+- Do not set `desired_results` unless the user's query explicitly states a number.

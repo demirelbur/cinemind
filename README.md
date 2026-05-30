@@ -88,18 +88,53 @@ Access the app at:
 
 ## 🚀 Usage
 
-Ask for recommendations in natural language, for example:
-
-- "Give me 3 dark sci-fi movies after 2010."
-- "Recommend a family-friendly movie with no horror."
-
-You can use the Streamlit UI, the Swagger docs at <http://localhost:8000/docs>, or call the API directly:
+Ask for recommendations in natural language through the Streamlit UI, Swagger docs at <http://localhost:8000/docs>, or the API directly:
 
 ```bash
 curl -X POST http://localhost:8000/recommend \
   -H "Content-Type: application/json" \
   -d '{"query": "I want a nice comedy about friendship", "max_results": 5}'
 ```
+
+### Example Queries
+
+**Basic genre:**
+- "Recommend 3 sci-fi movies"
+- "I want to watch a comedy"
+- "Suggest some horror films"
+
+**Genre + year range:**
+- "Sci-fi movies from the 80s"
+- "Comedy movies from the 90s"
+- "Drama films after 2015"
+- "Action movies before 2000"
+
+**Genre + mood / theme:**
+- "Dark thriller movies about revenge"
+- "Light-hearted comedies about friendship"
+- "Intense action movies with space themes"
+
+**Audience filter:**
+- "Family-friendly sci-fi movies"
+- "Horror movies for adults"
+- "Comedy for kids"
+
+**Highly rated:**
+- "Top-rated drama movies"
+- "Highly rated science fiction from the 70s"
+
+**Exclusions:**
+- "Drama movies but no romance"
+- "Action films without any comedy"
+
+**Complex multi-signal:**
+- "Recommend 3 dark sci-fi movies from the 80s for teens with themes of survival"
+- "I want uplifting comedies for the family, nothing too old"
+- "Give me 5 highly rated thrillers, no horror please"
+
+**Broad / minimal constraints:**
+- "Something highly rated"
+- "Recommend me a good movie"
 
 ## 🔧 Environment Variables
 

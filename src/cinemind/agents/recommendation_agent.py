@@ -11,7 +11,7 @@ from cinemind.schemas.recommendation import RecommendationContext
 
 
 @cache
-def get_recommendation_agent() -> Agent:
+def get_recommendation_agent() -> Agent[None, RecommendationResponse]:
     settings = get_settings()
     provider = OpenRouterProvider(api_key=settings.openrouter_api_key)
     model = OpenRouterModel(
@@ -24,7 +24,7 @@ def get_recommendation_agent() -> Agent:
         description="Ranks and explains movie recommendations from candidate movies.",
         output_type=RecommendationResponse,
         system_prompt=RECOMMENDATION_AGENT_SYSTEM_PROMPT,
-        retries=2,
+        output_retries=3,
     )
 
 
@@ -39,27 +39,18 @@ def recommend_movies(context: RecommendationContext) -> RecommendationResponse:
         RecommendationResponse
     """
 
-    # Convert candidates into clean JSON-like structure
-    candidates_payload = [movie.model_dump() for movie in context.candidates]
-
     prompt = (
         "Generate grounded movie recommendations from the following context.\n\n"
         f"User query:\n{context.query}\n\n"
         f"Parsed preferences:\n{context.preferences.model_dump_json(indent=2)}\n\n"
-        f"Maximum recommendations to return:\n{context.max_results}\n\n"
-        f"Candidate movies:\n{candidates_payload}\n\n"
-        "Return a RecommendationResponse using ONLY the candidate movies."
+        f"Candidate movies:\n{context.candidates}\n\n"
+        f"Return at most {context.max_results} recommendations using ONLY the candidate movies."
     )
 
-    result = get_recommendation_agent().run_sync(prompt)
+    response = get_recommendation_agent().run_sync(prompt).output
 
-    response: RecommendationResponse = result.output
-
-    # ✅ Defensive post-processing (important in production)
+    # Defensive: respect max_results even if LLM overproduces
     if len(response.recommendations) > context.max_results:
-        response = RecommendationResponse(
-            query=response.query,
-            recommendations=response.recommendations[: context.max_results],
-        )
+        response.recommendations = response.recommendations[: context.max_results]
 
     return response

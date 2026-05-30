@@ -84,7 +84,7 @@ class MovieRecommendation(StrictBaseModel):
     reason: str = Field(
         ...,
         min_length=10,
-        max_length=300,
+        max_length=1000,
         description="Short explanation of why this movie matches the user's request.",
     )
     match_score: float = Field(
