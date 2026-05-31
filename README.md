@@ -12,7 +12,7 @@ It takes natural-language preferences, parses intent with an LLM, retrieves cand
 - Two-stage pipeline: intent parsing and grounded recommendation
 - Deterministic PostgreSQL retrieval (no free-form SQL generation)
 - pydantic_ai handles LLM output validation and automatic retries
-- FastAPI backend, Streamlit frontend, pytest-based test strategy
+- FastAPI backend, Next.js frontend, pytest-based test strategy
 - Fully containerized with Docker Compose for one-command startup
 
 ## ℹ️ Overview
@@ -37,7 +37,7 @@ cp .env.example .env
 
 ### Option 1: Docker Compose (Recommended)
 
-Requires Docker and Docker Compose. This starts PostgreSQL, the FastAPI backend, and the Streamlit frontend in one command.
+Requires Docker and Docker Compose. This starts PostgreSQL, the FastAPI backend, and the Next.js frontend in one command.
 
 ```bash
 # Start all services
@@ -52,7 +52,7 @@ docker compose logs -f
 
 Access the app:
 
-- **Frontend**: <http://localhost:8501>
+- **Frontend**: <http://localhost:3000>
 - **API**: <http://localhost:8000>
 - **API Docs (Swagger)**: <http://localhost:8000/docs>
 
@@ -65,12 +65,10 @@ docker compose down
 
 ### Option 2: Local Development
 
-Minimum requirements: Python 3.11+, `uv`, PostgreSQL running locally (port 5432).
-
-Install `uv` if you don't have it: `pip install uv`
+Minimum requirements: Python 3.11+, `uv`, Node.js 20+, `npm`, PostgreSQL running locally (port 5432).
 
 ```bash
-# 1. Install dependencies
+# 1. Install Python dependencies
 uv sync
 
 # 2. Ensure PostgreSQL is running with database `cinemind_db`
@@ -85,18 +83,18 @@ uv run python scripts/load_movies.py
 # 5a. Start FastAPI backend (terminal 1)
 uv run uvicorn cinemind.api.main:app --reload
 
-# 5b. Start Streamlit frontend (terminal 2)
-uv run streamlit run src/cinemind/frontend/app.py
+# 5b. Start Next.js frontend (terminal 2)
+cd frontend && npm install && npm run dev
 ```
 
 Access the app at:
 
-- **Frontend**: <http://localhost:8501>
+- **Frontend**: <http://localhost:3000>
 - **API**: <http://localhost:8000>
 
 ## 🚀 Usage
 
-Ask for recommendations in natural language through the Streamlit UI, Swagger docs at <http://localhost:8000/docs>, or the API directly:
+Ask for recommendations in natural language through the web UI, Swagger docs at <http://localhost:8000/docs>, or the API directly:
 
 ```bash
 curl -X POST http://localhost:8000/recommend \
@@ -162,7 +160,7 @@ Configure via `.env` file or environment variables:
 | `DATABASE_URL` | yes | — | PostgreSQL connection string (e.g., `postgresql+psycopg://user:pass@localhost:5432/cinemind_db`) |
 | `LLM_PROVIDER` | no | `openrouter` | Must be the literal string `openrouter` |
 | `LLM_MODEL_NAME` | no | `openai/gpt-4o` | Model name with provider prefix (e.g., `openai/gpt-4o`) |
-| `CINEMIND_API_BASE_URL` | no | `http://127.0.0.1:8000` | Backend URL used by the Streamlit frontend |
+| `CINEMIND_API_BASE_URL` | no | `http://127.0.0.1:8000` | Backend URL used by the frontend |
 
 > **Note:** `LLM_MODEL_NAME` must always include the provider prefix (e.g., `openai/gpt-4o`, `anthropic/claude-sonnet-4-20250514`). A bare name like `gpt-4o` will cause a startup error.
 

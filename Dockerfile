@@ -28,7 +28,7 @@ RUN uv sync --frozen --no-dev
 # Make entrypoint script executable
 RUN chmod +x /app/postgres_docker_entrypoint.sh
 
-EXPOSE 8000 8501
+EXPOSE 8000
 
 # Default to API server — override CMD in docker-compose per service
 ENTRYPOINT ["/app/postgres_docker_entrypoint.sh"]

@@ -35,19 +35,21 @@ services:
         condition: service_healthy
     command: ["uvicorn", "cinemind.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
-  frontend:
-    build: .
-    container_name: cinemind-frontend
+  web:
+    build:
+      dockerfile: Dockerfile.frontend
+      context: .
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://api:8000
+    container_name: cinemind-web
     restart: unless-stopped
     environment:
-      CINEMIND_API_BASE_URL: http://api:8000
+      NEXT_PUBLIC_API_BASE_URL: http://api:8000
     ports:
-      - "8501:8501"
+      - "3000:3000"
     depends_on:
       api:
         condition: service_started
-    entrypoint: []
-    command: ["streamlit", "run", "src/cinemind/frontend/app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
 
 volumes:
   pgdata:

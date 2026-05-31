@@ -9,7 +9,7 @@ uv sync
 Or, if needed:
 
 ```bash
-uv add fastapi uvicorn sqlalchemy alembic "psycopg[binary]" python-dotenv streamlit requests pandas kaggle pydantic pydantic-ai
+uv add fastapi uvicorn sqlalchemy alembic "psycopg[binary]" python-dotenv requests pandas kaggle pydantic pydantic-ai
 ```
 
 ## 2. Configure environment variables
@@ -62,22 +62,16 @@ Useful endpoints:
 
 ## 5. Run the frontend
 
-```bash
-uv run streamlit run src/cinemind/frontend/app.py
-```
+The frontend is a Next.js app in the `frontend/` directory. See the main
+[README.md](../README.md) for instructions on running it via Docker Compose
+or locally with `npm run dev`.
 
-Then open the local Streamlit URL shown in the terminal.
+## 6. Run full app
 
-## 6. Run full app (two terminals)
-
-Terminal 1:
+The recommended way to run the full stack is with Docker Compose:
 
 ```bash
-uv run uvicorn cinemind.api.main:app --reload
+docker compose up -d
 ```
 
-Terminal 2:
-
-```bash
-uv run streamlit run src/cinemind/frontend/app.py
-```
+This starts PostgreSQL, the FastAPI backend, and the Next.js frontend in one command.
