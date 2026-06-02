@@ -26,6 +26,7 @@ services:
       LLM_PROVIDER: openrouter
       LLM_MODEL_NAME: ${LLM_MODEL_NAME:-openai/gpt-4o}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      TMDB_READ_ACCESS_TOKEN: ${TMDB_READ_ACCESS_TOKEN}
     ports:
       - "8000:8000"
     volumes:

@@ -2,12 +2,11 @@
 
 import { useCallback } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AlertTriangle, Sparkles } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 import AppHeader from '@/components/layout/AppHeader';
 import BackgroundGlow from '@/components/layout/BackgroundGlow';
-import MessageList from '@/components/chat/MessageList';
 import ChatInput from '@/components/chat/ChatInput';
 import SuggestedPrompts from '@/components/chat/SuggestedPrompts';
 import MovieCard from '@/components/movie/MovieCard';
@@ -19,6 +18,54 @@ import { useChatStore } from '@/store/useChatStore';
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },
 });
+
+function buildSummary(query: string, count: number): { header: string; body: string } {
+  const q = query.toLowerCase();
+
+  if (q.includes('dark') && q.includes('sci-fi')) {
+    return {
+      header: `Why these ${count} picks?`,
+      body: 'You asked for dark science fiction films. I prioritized atmospheric, moody titles with strong critical reception and themes of existential dread, dystopian settings, or psychological unease.',
+    };
+  }
+  if (q.includes('comedy')) {
+    return {
+      header: `Why these ${count} picks?`,
+      body: 'You asked for comedies. I selected well-reviewed films with varied humor styles — from witty satire to heartfelt stories — focusing on broad audience appeal and standout performances.',
+    };
+  }
+  if (q.includes('horror')) {
+    return {
+      header: `Why these ${count} picks?`,
+      body: 'You asked for horror films. I chose titles that favor atmosphere and dread over cheap jumpscares, prioritizing films with lasting impact and distinctive storytelling.',
+    };
+  }
+  if (q.includes('action')) {
+    return {
+      header: `Why these ${count} picks?`,
+      body: 'You asked for action films. I prioritized high-energy picks with lasting cultural impact and memorable set pieces, balancing mainstream appeal with standout quality.',
+    };
+  }
+  if (q.includes('family')) {
+    return {
+      header: `Why these ${count} picks?`,
+      body: 'You asked for family-friendly picks. I chose warm, engaging films with broad appeal, focusing on stories that resonate across ages while maintaining quality.',
+    };
+  }
+  if (q.includes('underrated')) {
+    return {
+      header: `Why these ${count} picks?`,
+      body: `You asked for underrated films. Less mainstream titles were ranked higher than popular blockbusters, prioritizing critical reception over box office numbers.`,
+    };
+  }
+
+  // Default
+  const genre = q.includes('sci-fi') || q.includes('science fiction') ? 'science fiction' : q.includes('thriller') ? 'thrillers' : q.includes('drama') ? 'dramas' : 'films';
+  return {
+    header: `Why these ${count} picks?`,
+    body: `You asked for ${genre}. I selected critically acclaimed titles that align with your request, ranked by relevance to your query and overall quality.`,
+  };
+}
 
 function CineMindApp() {
   const { messages, isLoading, error, addMessage, setLoading, setError } =
@@ -38,23 +85,23 @@ function CineMindApp() {
           addMessage({
             id: crypto.randomUUID(),
             role: 'assistant',
-            content:
-              "Based on your request, I prioritized critically acclaimed titles with strong audience appeal and cultural impact.",
+            content: JSON.stringify(buildSummary(message, mockMovies.length)),
             movies: mockMovies,
           });
         } else {
           const { movies, answer } = await sendChatMessage(message);
+          const summary = buildSummary(message, movies.length);
           addMessage({
             id: crypto.randomUUID(),
             role: 'assistant',
-            content: answer,
+            content: JSON.stringify(summary),
             movies,
           });
         }
       } catch (err) {
-        const msg =
-          err instanceof Error ? err.message : 'Something went wrong. Please try again.';
-        setError(msg);
+        setError(
+          err instanceof Error ? err.message : 'Something went wrong. Please try again.',
+        );
       } finally {
         setLoading(false);
       }
@@ -62,16 +109,34 @@ function CineMindApp() {
     [addMessage, setLoading, setError],
   );
 
-  const lastUserMsg = messages.find((m) => m.role === 'user');
-  const latestResult = [...messages].reverse().find((m) => m.role === 'assistant' && m.movies?.length);
-  const showEmptyState = messages.filter((m) => m.role === 'user').length === 0 && !isLoading;
+  const lastUserMsg = [...messages].reverse().find((m) => m.role === 'user');
+  const latestResult = [...messages].reverse().find(
+    (m) => m.role === 'assistant' && m.movies?.length,
+  );
+  const hasResults =
+    !isLoading && lastUserMsg && latestResult && latestResult.movies?.length;
+
+  // Parse summary from assistant content
+  let summary: { header: string; body: string } | null = null;
+  if (latestResult) {
+    try {
+      summary = JSON.parse(latestResult.content);
+    } catch {
+      // If not JSON, use it as the body
+      summary = { header: 'Based on your request', body: latestResult.content };
+    }
+  }
+
+  const showEmptyState = !messages.length && !isLoading;
 
   return (
     <div className="noise-overlay relative flex min-h-screen flex-col">
       <BackgroundGlow />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[960px] flex-1 flex-col px-4 pb-64 pt-4 sm:px-6 md:pt-8">
-        <AppHeader />
+      <div className="relative z-10 mx-auto flex w-full max-w-[860px] flex-1 flex-col px-4 sm:px-6">
+        <div className="pt-6 md:pt-10">
+          <AppHeader />
+        </div>
 
         {error && (
           <motion.div
@@ -94,53 +159,58 @@ function CineMindApp() {
           </motion.div>
         )}
 
-        {/* Empty state hero */}
+        {/* Empty state */}
         {showEmptyState && (
           <div className="flex flex-1 flex-col items-center justify-center py-20">
             <SuggestedPrompts onSelect={handleSubmit} />
           </div>
         )}
 
-        <MessageList messages={messages} isLoading={isLoading} />
+        {/* Latest query */}
+        {!showEmptyState && lastUserMsg && (
+          <motion.div
+            key={`q-${lastUserMsg.id}`}
+            className="mb-4"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <p className="text-[12px] font-medium uppercase tracking-wider text-zinc-500">
+              You asked
+            </p>
+            <p className="mt-1 text-lg font-medium text-white">"{lastUserMsg.content}"</p>
+          </motion.div>
+        )}
 
-        {/* AI Summary + Movie Cards */}
+        {/* Results */}
         {!showEmptyState && (
           <>
-            {/* AI Recommendation Summary + Movie Cards — keyed on latestResult.id
-                so Framer Motion re-animates on each new search */}
-            {!isLoading && lastUserMsg && latestResult && latestResult.movies && (
+            {hasResults && summary && (
               <motion.div
-                key={latestResult.id}
-                className="mt-4"
+                key={latestResult!.id}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
+                transition={{ delay: 0.06 }}
               >
-                <div className="mb-8">
-                  <div className="mb-3 flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-red-400" />
-                    <h4 className="text-[14px] font-semibold text-zinc-400">
-                      Based on your request
-                    </h4>
-                  </div>
-                  <blockquote className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
-                    <p className="text-[15px] leading-relaxed text-zinc-300">
-                      "{latestResult.content}"
-                    </p>
-                  </blockquote>
+                {/* AI ranking explanation */}
+                <div className="mb-5">
+                  <h4 className="mb-1.5 text-[15px] font-semibold text-zinc-300">
+                    {summary.header}
+                  </h4>
+                  <p className="text-[14px] leading-relaxed text-zinc-400">{summary.body}</p>
                 </div>
 
-                <div className="space-y-6">
-                  {latestResult.movies.map((movie, idx) => (
+                {/* Movie cards */}
+                <div className="space-y-3">
+                  {latestResult.movies!.map((movie, idx) => (
                     <MovieCard key={movie.id + idx} movie={movie} index={idx} />
                   ))}
                 </div>
               </motion.div>
             )}
 
-            {/* Loading skeletons — show when loading, hide old cards */}
+            {/* Loading skeletons */}
             {isLoading && lastUserMsg && (
-              <div className="space-y-6 pt-4">
+              <div className="space-y-3">
                 <MovieCardSkeleton index={0} />
                 <MovieCardSkeleton index={1} />
                 <MovieCardSkeleton index={2} />
@@ -148,11 +218,14 @@ function CineMindApp() {
             )}
           </>
         )}
+
+        {/* Bottom spacer for sticky input */}
+        <div className="h-44" />
       </div>
 
       {/* Sticky bottom input */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 pb-8 pt-8">
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#08080A] to-transparent" />
+      <div className="fixed bottom-0 left-0 right-0 z-20 pb-5 pt-5">
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#08080A] to-transparent" />
         <div className="relative">
           <ChatInput onSubmit={handleSubmit} isLoading={isLoading} />
         </div>

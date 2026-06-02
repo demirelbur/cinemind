@@ -28,22 +28,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const data: { query: string; recommendations: Array<{ movie: { title: string; genre: string; year: number; rating: number; synopsis: string; director: string | null; lead_actor: string | null; recommended_for: string | null }; reason: string; match_score: number }> } = await res.json();
+    const data: { query: string; recommendations: Array<{ movie: Record<string, unknown>; reason: string; match_score: number }> } = await res.json();
 
-    const movies = data.recommendations.map((rec) => ({
-      id: rec.movie.title.toLowerCase().replace(/[^\w]+/g, '-'),
-      title: rec.movie.title,
-      posterUrl: null,
-      year: rec.movie.year,
-      genre: rec.movie.genre,
-      rating: rec.movie.rating,
-      synopsis: rec.movie.synopsis,
-      director: rec.movie.director,
-      lead_actor: rec.movie.lead_actor,
-      recommended_for: rec.movie.recommended_for,
-      match_score: Math.round(rec.match_score * 100),
-      reason: rec.reason,
-    }));
+    const movies = data.recommendations.map((rec) => {
+      const m = rec.movie;
+      return {
+        title: m.title,
+        poster_url: m.poster_url || null,
+        backdrop_url: m.backdrop_url || null,
+        trailer_url: m.trailer_url || null,
+        editorial_tags: m.editorial_tags || null,
+        vote_count: m.vote_count || null,
+        year: m.year,
+        genre: m.genre,
+        rating: m.rating,
+        synopsis: m.synopsis,
+        director: m.director,
+        lead_actor: m.lead_actor,
+        lead_actor_2: m.lead_actor_2 || null,
+        lead_actor_3: m.lead_actor_3 || null,
+        recommended_for: m.recommended_for,
+        match_score: Math.round((rec.match_score as number) * 100),
+        reason: rec.reason,
+      };
+    });
 
     return NextResponse.json({
       answer: `Found ${movies.length} movie${movies.length === 1 ? '' : 's'} matching your request.`,

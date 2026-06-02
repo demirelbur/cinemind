@@ -1,18 +1,15 @@
 """
-This script should:
-1. read `data/procewssed/movies_clean.csv`
-2. validate rows if needed
-3. insert them into the `movies`table
-4. avoid duplicate-loading mistakes
+Load movies from processed CSV into the enriched movies table.
+Maps old schema (title, genre, year, rating, synopsis, ...) to new schema
+(imdb_title, imdb_year, imdb_rating, ...).
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 
-import pandas as pd  # type: ignore
+import pandas as pd
 from sqlalchemy import delete
-from sqlalchemy.exc import SQLAlchemyError
 
 from cinemind.db.models import Movie
 from cinemind.db.session import SessionLocal
@@ -26,41 +23,31 @@ def main() -> None:
         raise FileNotFoundError(f"Processed file not found: {PROCESSED_FILE}")
 
     df = pd.read_csv(PROCESSED_FILE)
-    # Pandas represents missing string values as NaN; convert to None for Pydantic/SQLAlchemy.
     df = df.where(pd.notna(df), None)
 
     session = SessionLocal()
-
     try:
-        # For MVP/dev: clear the table before loading new data to avoid duplicates
         session.execute(delete(Movie))
         session.commit()
 
-        movies_to_insert: list[Movie] = []
+        movies_to_insert = []
         for row in df.to_dict(orient="records"):
-            cleaned_row = {
-                key: (None if pd.isna(value) else value) for key, value in row.items()
-            }
-            record = MovieRecord(**cleaned_row)
+            cleaned = {k: (None if pd.isna(v) else v) for k, v in row.items()}
+            record = MovieRecord(**cleaned)
             movies_to_insert.append(
                 Movie(
-                    title=record.title,
-                    genre=record.genre,
-                    year=record.year,
-                    rating=record.rating,
-                    synopsis=record.synopsis,
+                    imdb_title=record.title,
+                    imdb_year=record.year,
+                    imdb_rating=record.rating,
                     director=record.director,
                     lead_actor=record.lead_actor,
                     recommended_for=record.recommended_for,
                 )
             )
+
         session.bulk_save_objects(movies_to_insert)
         session.commit()
-        print(f"Successfully loaded {len(movies_to_insert)} movies into the database.")
-
-    except SQLAlchemyError as exc:
-        session.rollback()
-        raise RuntimeError(f"Database error while loading movies: {exc}") from exc
+        print(f"Loaded {len(movies_to_insert)} movies.")
 
     finally:
         session.close()
@@ -68,3 +55,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

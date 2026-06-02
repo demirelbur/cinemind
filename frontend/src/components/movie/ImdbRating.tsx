@@ -1,5 +1,7 @@
 'use client';
 
+import { Star } from 'lucide-react';
+
 function formatVotes(votes?: number): string {
   if (!votes) return '';
   if (votes >= 1_000_000) return `${(votes / 1_000_000).toFixed(1)}M`;
@@ -14,16 +16,13 @@ interface ImdbRatingProps {
 
 export default function ImdbRating({ rating, votes }: ImdbRatingProps) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="rounded bg-[#F5C518] px-1.5 py-0.5 text-[11px] font-black text-black">
+    <div className="flex items-center gap-1.5">
+      <Star className="h-3 w-3 fill-[#F5C518] text-[#F5C518]" />
+      <span className="text-[13px] font-semibold text-white">{rating.toFixed(1)}</span>
+      <span className="text-[12px] text-zinc-500">
         IMDb
+        {votes && <span className="text-zinc-600"> · {formatVotes(votes)} ratings</span>}
       </span>
-      <span className="text-xs font-semibold text-white">
-        {rating.toFixed(1)}/10
-      </span>
-      {votes && (
-        <span className="text-xs text-zinc-500">{formatVotes(votes)}</span>
-      )}
     </div>
   );
 }

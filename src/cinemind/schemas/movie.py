@@ -24,17 +24,17 @@ class MovieRecord(StrictBaseModel):
     title: str = Field(
         ...,
         min_length=1,
-        max_length=100,
+        max_length=255,
         description="Movie title.",
     )
-    genre: GenreLiteral = Field(
-        ...,
+    genre: GenreLiteral | None = Field(
+        default=None,
         description="Primary normalized genre used by CineMind.",
     )
     year: int = Field(
         ...,
         ge=1900,
-        le=2025,
+        le=2030,
         description="Movie release year.",
     )
     rating: float = Field(
@@ -45,8 +45,8 @@ class MovieRecord(StrictBaseModel):
     )
     synopsis: str = Field(
         ...,
-        min_length=10,
-        max_length=500,
+        min_length=1,
+        max_length=1000,
         description="Brief plot summary.",
     )
     director: str | None = Field(
@@ -61,8 +61,36 @@ class MovieRecord(StrictBaseModel):
         default=None,
         description="Suggested audience category for the movie.",
     )
+    poster_url: str | None = Field(
+        default=None,
+        description="Poster image URL.",
+    )
+    backdrop_url: str | None = Field(
+        default=None,
+        description="Backdrop image URL.",
+    )
+    trailer_url: str | None = Field(
+        default=None,
+        description="YouTube trailer URL.",
+    )
+    editorial_tags: list[str] | None = Field(
+        default=None,
+        description="Discovery tags for the movie.",
+    )
+    vote_count: int | None = Field(
+        default=None,
+        description="Number of votes on IMDb/TMDB.",
+    )
+    lead_actor_2: str | None = Field(
+        default=None,
+        description="Second lead actor.",
+    )
+    lead_actor_3: str | None = Field(
+        default=None,
+        description="Third lead actor.",
+    )
 
-    @field_validator("title", "synopsis", "director", "lead_actor", mode="before")
+    @field_validator("title", "synopsis", "director", "lead_actor", "lead_actor_2", "lead_actor_3", mode="before")
     @classmethod
     def normalize_strings(cls, value: object) -> object:
         """Collapse repeated whitespace and convert empty strings to None."""
