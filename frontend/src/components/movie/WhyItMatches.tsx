@@ -1,38 +1,42 @@
 'use client';
 
-import { Check } from 'lucide-react';
+import { useState } from 'react';
 
 interface WhyItMatchesProps {
   reason: string;
-  tags?: string[];
 }
 
 const MAX_REASON_CHARS = 160;
 
-export default function WhyItMatches({ reason, tags }: WhyItMatchesProps) {
-  const displayTags = tags?.filter(Boolean).slice(0, 4) || [];
+function truncateAtSentence(text: string, maxChars: number): string {
+  if (text.length <= maxChars) return text;
+  const window = text.slice(0, maxChars);
+  const lastPeriod = window.lastIndexOf('.');
+  if (lastPeriod > maxChars * 0.5) {
+    return window.slice(0, lastPeriod + 1);
+  }
+  const lastSpace = window.lastIndexOf(' ');
+  return (lastSpace > maxChars * 0.5 ? window.slice(0, lastSpace) : window.slice(0, maxChars)).replace(/\s+$/, '') + '…';
+}
 
+export default function WhyItMatches({ reason }: WhyItMatchesProps) {
+  const [expanded, setExpanded] = useState(false);
   const reasonLong = reason.length > MAX_REASON_CHARS;
-  const displayReason = reasonLong ? reason.slice(0, reason.lastIndexOf(' ', MAX_REASON_CHARS)) + '…' : reason;
+  const displayReason = expanded || !reasonLong ? reason : truncateAtSentence(reason, MAX_REASON_CHARS);
 
   return (
-    <div className="rounded-xl border border-zinc-700/50 bg-zinc-900/60 p-3">
-      {displayTags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {displayTags.map((tag) => (
-            <span
-              key={tag}
-              className="inline-flex h-5 items-center gap-1 rounded-full border border-[rgba(34,197,94,0.25)] bg-[rgba(34,197,94,0.1)] px-2 text-[11px] font-medium text-green-400"
-            >
-              <Check className="h-2 w-2" />
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
-      <p className="mt-1.5 text-[12px] leading-snug text-zinc-300">
+    <div className="rounded-xl bg-zinc-900/40 p-3">
+      <p className="text-[12px] leading-snug text-zinc-300">
         {displayReason}
       </p>
+      {reasonLong && !expanded && (
+        <button
+          onClick={() => setExpanded(true)}
+          className="mt-1 text-[11px] text-zinc-500 underline underline-offset-2 hover:text-zinc-300"
+        >
+          Read more
+        </button>
+      )}
     </div>
   );
 }

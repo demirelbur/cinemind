@@ -1,6 +1,6 @@
 'use client';
 
-import { Film, Play, Sparkles, Bookmark } from 'lucide-react';
+import { Film, Play, Star, User, Sparkles, Bookmark } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
@@ -164,7 +164,7 @@ function ContentSection({
             Why it matches
           </span>
         </div>
-        <WhyItMatches reason={movie.reason} tags={[]} />
+        <WhyItMatches reason={movie.reason} />
       </div>
 
       {/* Section 2: Story */}
@@ -176,37 +176,39 @@ function ContentSection({
               Story
             </span>
           </div>
-          <p className="text-[13px] leading-relaxed text-zinc-400">
-            {synopsisExpanded || !synopsisLong ? movie.synopsis : synopsisShort}
-          </p>
-          {synopsisLong && !synopsisExpanded && (
-            <button
-              onClick={() => setSynopsisExpanded(true)}
-              className="mt-0.5 text-[11px] text-zinc-500 underline underline-offset-2 hover:text-zinc-300"
-            >
-              Read more
-            </button>
-          )}
+          <div className="rounded-xl bg-zinc-900/40 p-3">
+            <p className="text-[12px] leading-snug text-zinc-300">
+              {synopsisExpanded || !synopsisLong ? movie.synopsis : synopsisShort}
+            </p>
+            {synopsisLong && !synopsisExpanded && (
+              <button
+                onClick={() => setSynopsisExpanded(true)}
+                className="mt-1 text-[11px] text-zinc-500 underline underline-offset-2 hover:text-zinc-300"
+              >
+                Read more
+              </button>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Credits with labels */}
-      <div className="flex flex-wrap items-center gap-4">
+      {/* Credits with icons */}
+      <div className="flex flex-wrap items-center gap-3">
         {movie.director && (
-          <span className="text-[12px] text-zinc-400">
-            <span className="text-zinc-600">Director </span>
+          <span className="flex items-center gap-1.5 text-[12px] text-zinc-400">
+            <Film className="h-3 w-3 text-zinc-500" />
             <span className="text-zinc-300">{movie.director.name}</span>
           </span>
         )}
         {movie.leadActor && (
-          <span className="text-[12px] text-zinc-400">
-            <span className="text-zinc-600">Lead </span>
+          <span className="flex items-center gap-1.5 text-[12px] text-zinc-400">
+            <Star className="h-3 w-3 text-zinc-500" />
             <span className="text-zinc-300">{movie.leadActor.name}</span>
           </span>
         )}
         {movie.audience && (
-          <span className="text-[12px] text-zinc-400">
-            <span className="text-zinc-600">Audience </span>
+          <span className="flex items-center gap-1.5 text-[12px] text-zinc-400">
+            <User className="h-3 w-3 text-zinc-500" />
             <span className="text-zinc-300">{movie.audience}</span>
           </span>
         )}
