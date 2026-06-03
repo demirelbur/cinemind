@@ -15,7 +15,7 @@ export default function AppHeader() {
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-600/10">
           <Film className="h-5 w-5 text-red-500" />
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-white md:text-[36px]">
+        <h1 className="text-4xl font-bold tracking-tight text-white md:text-[44px]">
           Cine<span className="text-red-500">Mind</span>
         </h1>
       </div>

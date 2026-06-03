@@ -46,14 +46,15 @@ export default function ChatInput({ onSubmit, isLoading }: ChatInputProps) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <div className="flex items-end gap-2 rounded-2xl bg-white/[0.02] p-3">
+        <div className="flex items-center gap-2 rounded-2xl bg-white/[0.02] px-4 py-3">
           <textarea
             ref={textareaRef}
-            placeholder="Try: Recommend 3 dark sci-fi movies from the 80s..."
+            placeholder="Ask for a genre, mood, decade, actor, or vibe..."
             disabled={isLoading}
             rows={1}
             onKeyDown={handleKeyDown}
-            className="flex-1 resize-none bg-transparent text-[15px] leading-relaxed text-white placeholder:text-zinc-500 outline-none [resize:none] disabled:opacity-50"
+            className="flex-1 resize-none bg-transparent text-[15px] leading-6 py-1 text-white placeholder:text-zinc-500 outline-none [resize:none] disabled:opacity-50"
+            style={{ minHeight: '24px' }}
           />
           <button
             type="submit"

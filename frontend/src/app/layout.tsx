@@ -14,7 +14,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'CineMind',
-  description: 'Grounded, AI-powered movie recommendations',
+  description: 'Grounded AI movie recommendations',
+  icons: {
+    icon: '/icon.svg',
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export default function RootLayout({

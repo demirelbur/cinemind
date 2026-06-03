@@ -3,7 +3,7 @@
 import { Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const SUGGESTED_PROMPTS = [
+const PROMPTS = [
   'Recommend 3 dark sci-fi movies from the 80s',
   'Movies like Interstellar but more emotional',
   'Give me 3 comedy movies from the 2000s',
@@ -12,75 +12,76 @@ const SUGGESTED_PROMPTS = [
   'Underrated horror films for adults',
 ];
 
-const EXAMPLES = [
-  'Sci-fi movies like Interstellar',
-  'Dark thrillers from the 90s',
-  'Family movies for a rainy weekend',
-  'Underrated horror films',
-];
-
 interface SuggestedPromptsProps {
   onSelect: (prompt: string) => void;
 }
 
 export default function SuggestedPrompts({ onSelect }: SuggestedPromptsProps) {
   return (
-    <div className="mx-auto max-w-[560px] text-center">
-      <motion.div
-        className="mb-6 flex items-center justify-center gap-2"
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-      >
-        <Sparkles className="h-5 w-5 text-red-400" />
-        <h2 className="text-[32px] font-bold tracking-tight text-white md:text-[40px]">
-          Find movies using{' '}
-          <span className="bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
-            natural language
-          </span>
-        </h2>
-      </motion.div>
+    <div className="mx-auto text-center">
+      <div className="mx-auto max-w-[520px]">
+        {/* Headline */}
+        <motion.div
+          className="mb-3 flex items-center justify-center gap-2"
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Sparkles className="h-5 w-5 text-red-400" />
+          <h2 className="text-[26px] font-bold tracking-tight text-white md:text-[30px]">
+            Ask for movies{' '}
+            <span className="bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
+              the way you think
+            </span>
+          </h2>
+        </motion.div>
 
+        {/* Subtitle */}
+        <motion.p
+          className="mb-4 text-[15px] leading-relaxed text-zinc-400"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.15 }}
+        >
+          Be as specific or broad as you like—genre, mood, decade, actor, or vibe.
+        </motion.p>
+
+        {/* Trust line */}
+        <motion.p
+          className="mb-6 text-[13px] leading-relaxed text-zinc-500"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          Recommendations are ranked by relevance, IMDb rating, and movie metadata.
+        </motion.p>
+      </div>
+
+      {/* Chips label */}
       <motion.p
-        className="mb-8 text-[17px] leading-relaxed text-zinc-400"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-      >
-        Ask for anything. Be as specific or broad as you like.
-      </motion.p>
-
-      <motion.div
-        className="mb-8 text-left"
+        className="mb-5 text-[12px] font-semibold uppercase tracking-wider text-zinc-600"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.25 }}
       >
-        <p className="mb-3 text-sm font-medium text-zinc-500">For example:</p>
-        <ul className="space-y-2">
-          {EXAMPLES.map((example, i) => (
-            <li key={i} className="flex items-start gap-3 text-[15px] text-zinc-400">
-              <span className="mt-2 h-1 w-1 flex-shrink-0 rounded-full bg-zinc-600" />
-              {example}
-            </li>
-          ))}
-        </ul>
-      </motion.div>
+        Try one of these
+      </motion.p>
 
+      {/* Clickable prompt chips */}
       <motion.div
-        className="flex flex-wrap justify-center gap-2"
+        className="mx-auto flex max-w-[860px] flex-wrap justify-center gap-4"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
-        {SUGGESTED_PROMPTS.map((prompt, i) => (
+        {PROMPTS.map((prompt, i) => (
           <motion.button
             key={prompt}
             onClick={() => onSelect(prompt)}
-            className="rounded-full border border-white/[0.06] bg-white/[0.03] px-4 py-2 text-[14px] text-zinc-300 transition-all hover:bg-white/[0.06] hover:text-white hover:border-white/10"
+            className="min-w-[220px] max-w-[400px] rounded-full border border-white/[0.08] bg-white/[0.04] px-5 py-2.5 text-[13px] font-medium text-zinc-300 transition-all hover:border-white/[0.14] hover:bg-white/[0.07] hover:text-white md:min-w-[260px] md:max-w-[420px]"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 + i * 0.05 }}
+            transition={{ delay: 0.35 + i * 0.04 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
