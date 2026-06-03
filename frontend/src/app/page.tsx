@@ -200,7 +200,7 @@ function CineMindApp() {
                 </div>
 
                 {/* Movie cards */}
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {latestResult.movies!.map((movie, idx) => (
                     <MovieCard key={movie.id + idx} movie={movie} index={idx} />
                   ))}

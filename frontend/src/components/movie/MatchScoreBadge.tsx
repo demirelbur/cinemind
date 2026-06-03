@@ -7,17 +7,18 @@ interface MatchScoreBadgeProps {
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 90) return '#FF1F2D';
-  if (score >= 80) return '#FF6B35';
+  if (score >= 95) return '#FF1F2D';
+  if (score >= 85) return '#FF6B35';
   if (score >= 70) return '#FBBF24';
   return '#71717A';
 }
 
 function getScoreLabel(score: number): string {
-  if (score >= 90) return 'Strong Match';
-  if (score >= 80) return 'Good Match';
-  if (score >= 70) return 'Alternative Pick';
-  return 'Consider';
+  if (score >= 95) return 'Perfect Match';
+  if (score >= 85) return 'Strong Match';
+  if (score >= 75) return 'Good Match';
+  if (score >= 65) return 'Worth Considering';
+  return 'Alternative Pick';
 }
 
 export default function MatchScoreBadge({ score }: MatchScoreBadgeProps) {
@@ -32,13 +33,18 @@ export default function MatchScoreBadge({ score }: MatchScoreBadgeProps) {
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.4, delay: 0.2 }}
     >
-      <div className="flex items-baseline gap-1">
-        <span className="text-[28px] font-bold leading-none tracking-tight" style={{ color }}>
+      <div className="flex items-baseline gap-0.5">
+        <span
+          className="text-[24px] font-bold leading-none tracking-tight"
+          style={{ color }}
+        >
           {clamped}
         </span>
-        <span className="text-[14px] font-semibold text-zinc-500">%</span>
+        <span className="text-[13px] font-semibold text-zinc-500">%</span>
       </div>
-      <span className="mt-0.5 text-[11px] font-medium text-zinc-500">{label}</span>
+      <span className="mt-0.5 text-[10px] font-medium text-zinc-500">
+        {label}
+      </span>
     </motion.div>
   );
 }

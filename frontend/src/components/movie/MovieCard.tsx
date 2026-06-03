@@ -1,6 +1,6 @@
 'use client';
 
-import { ExternalLink, Film, Play, Plus, Star, User } from 'lucide-react';
+import { Film, Play, Sparkles, Bookmark } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
@@ -24,9 +24,11 @@ function truncateSynopsis(text: string, maxWords: number): string {
 export default function MovieCard({ movie, index }: MovieCardProps) {
   const [synopsisExpanded, setSynopsisExpanded] = useState(false);
   const hasPoster = !!movie.posterUrl;
+  const hasBackdrop = !!movie.backdropUrl;
   const synopsisLong = movie.synopsis.length > 100;
   const synopsisShort = truncateSynopsis(movie.synopsis, 14);
-  const decade = `${Math.floor(movie.year / 10) * 10}s`;
+
+  const displayTags = movie.tags?.filter(Boolean).slice(0, 4) || [];
 
   return (
     <motion.article
@@ -38,239 +40,197 @@ export default function MovieCard({ movie, index }: MovieCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay: index * 0.08 }}
     >
-      {!hasPoster && (
-        <div className="flex flex-1 flex-col gap-3 p-5">
-          {/* Title + score — same row */}
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0 space-y-1.5">
-              <h3 className="truncate text-xl font-bold leading-tight tracking-tight text-white md:text-[22px]">
-                {movie.title}
-              </h3>
-              <div className="flex flex-wrap items-center gap-1.5 text-[13px] text-zinc-400">
-                <span>{movie.year}</span>
-                {movie.genres.map((g) => (
-                  <span key={g}>
-                    <span className="text-zinc-600">·</span>
-                    <span>{g}</span>
-                  </span>
-                ))}
-                {movie.duration !== 'N/A' && <span><span className="text-zinc-600">·</span> {movie.duration}</span>}
-                {movie.certification && (
-                  <span className="rounded border border-zinc-700 px-1.5 py-0.5 text-[11px] text-zinc-400">{movie.certification}</span>
-                )}
-              </div>
-              <ImdbRating rating={movie.imdbRating} votes={movie.imdbVotes} />
-            </div>
-            <MatchScoreBadge score={movie.matchScore} />
-          </div>
+      {hasBackdrop && (
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage: `url(${movie.backdropUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: 0.06,
+            filter: 'blur(2px)',
+          }}
+        />
+      )}
 
-          {/* Tags — prominent, near title */}
-          {movie.tags && movie.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {movie.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 text-[11px] font-medium text-zinc-300"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Why it matches — compressed: chips first, then one-liner */}
-          <WhyItMatches
-            reason={movie.reason}
-            details={movie.matchDetails}
-            genre={movie.genres[0]}
-            decade={decade}
-            audience={movie.audience}
+      <div className="relative">
+        {!hasPoster && (
+          <ContentSection
+            movie={movie}
+            synopsisExpanded={synopsisExpanded}
+            setSynopsisExpanded={setSynopsisExpanded}
+            synopsisLong={synopsisLong}
+            synopsisShort={synopsisShort}
+            displayTags={displayTags}
           />
+        )}
 
-          {/* Synopsis — collapsed to ~2 lines */}
+        {hasPoster && (
+          <div className="flex flex-col gap-0 lg:flex-row">
+            <div className="relative w-full lg:w-[28%] lg:min-w-[160px]">
+              <div className="group/poster relative aspect-[2/3] overflow-hidden rounded-l-xl lg:rounded-tr-none">
+                <motion.img
+                  src={movie.posterUrl!}
+                  alt={`Poster for ${movie.title}`}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover/poster:scale-105"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+
+            <ContentSection
+              movie={movie}
+              synopsisExpanded={synopsisExpanded}
+              setSynopsisExpanded={setSynopsisExpanded}
+              synopsisLong={synopsisLong}
+              synopsisShort={synopsisShort}
+              displayTags={displayTags}
+            />
+          </div>
+        )}
+      </div>
+    </motion.article>
+  );
+}
+
+interface ContentSectionProps {
+  movie: MovieRecommendation;
+  synopsisExpanded: boolean;
+  setSynopsisExpanded: (v: boolean) => void;
+  synopsisLong: boolean;
+  synopsisShort: string;
+  displayTags: string[];
+}
+
+function ContentSection({
+  movie,
+  synopsisExpanded,
+  setSynopsisExpanded,
+  synopsisLong,
+  synopsisShort,
+  displayTags,
+}: ContentSectionProps) {
+  return (
+    <div className="flex flex-1 flex-col gap-3 p-4">
+      {/* Title + score */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 space-y-1">
+          <h3 className="truncate text-[17px] font-bold leading-tight tracking-tight text-white md:text-[19px]">
+            {movie.title}
+          </h3>
+          <div className="flex flex-wrap items-center gap-1.5 text-[12px] text-zinc-400">
+            <span>{movie.year}</span>
+            {movie.genres.map((g) => (
+              <span key={g}>
+                <span className="text-zinc-600">·</span>
+                <span>{g}</span>
+              </span>
+            ))}
+            {movie.duration !== 'N/A' && (
+              <span>
+                <span className="text-zinc-600">·</span> {movie.duration}
+              </span>
+            )}
+            {movie.certification && (
+              <span className="rounded border border-zinc-700 px-1.5 py-0.5 text-[11px] text-zinc-400">
+                {movie.certification}
+              </span>
+            )}
+          </div>
+          <ImdbRating rating={movie.imdbRating} votes={movie.imdbVotes} />
+        </div>
+        <MatchScoreBadge score={movie.matchScore} />
+      </div>
+
+      {/* Editorial tags — more prominent */}
+      {displayTags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {displayTags.map((tag) => (
+            <span
+              key={tag}
+              className="rounded-full border border-white/[0.14] bg-white/[0.07] px-2.5 py-0.5 text-[11px] font-semibold text-zinc-200"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Section 1: Why It Matches */}
+      <div>
+        <div className="mb-1.5 flex items-center gap-1.5">
+          <Sparkles className="h-3.5 w-3.5 text-amber-400/80" />
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+            Why it matches
+          </span>
+        </div>
+        <WhyItMatches reason={movie.reason} tags={[]} />
+      </div>
+
+      {/* Section 2: Story */}
+      {movie.synopsis && (
+        <div>
+          <div className="mb-1.5 flex items-center gap-1.5">
+            <Bookmark className="h-3.5 w-3.5 text-zinc-500" />
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+              Story
+            </span>
+          </div>
           <p className="text-[13px] leading-relaxed text-zinc-400">
             {synopsisExpanded || !synopsisLong ? movie.synopsis : synopsisShort}
-            {synopsisLong && !synopsisExpanded && (
-              <button
-                onClick={() => setSynopsisExpanded(true)}
-                className="ml-0.5 text-[12px] text-zinc-500 underline underline-offset-2 hover:text-zinc-300"
-              >
-                Read more
-              </button>
-            )}
           </p>
-
-          {/* People — compact icon-only row */}
-          <div className="flex flex-wrap items-center gap-4">
-            {movie.director && (
-              <span className="flex items-center gap-1.5 text-[13px] text-zinc-400">
-                <Film className="h-3.5 w-3.5 text-zinc-500" />
-                {movie.director.name}
-              </span>
-            )}
-            {movie.leadActor && (
-              <span className="flex items-center gap-1.5 text-[13px] text-zinc-400">
-                <Star className="h-3.5 w-3.5 text-zinc-500" />
-                {movie.leadActor.name}
-              </span>
-            )}
-            {movie.audience && (
-              <span className="flex items-center gap-1.5 text-[13px] text-zinc-400">
-                <User className="h-3.5 w-3.5 text-zinc-500" />
-                {movie.audience}
-              </span>
-            )}
-          </div>
-
-          {/* Action bar — compact */}
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            {movie.trailerUrl ? (
-              <a
-                href={movie.trailerUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-red-600/90 px-4 py-2 text-[13px] font-medium text-white shadow-md shadow-red-600/15 transition-all hover:bg-red-500"
-              >
-                <Play className="h-3.5 w-3.5 fill-white" />
-                Trailer
-              </a>
-            ) : (
-              <button className="inline-flex items-center gap-1.5 rounded-lg bg-red-600/90 px-4 py-2 text-[13px] font-medium text-white shadow-md shadow-red-600/15 transition-all hover:bg-red-500">
-                <Play className="h-3.5 w-3.5 fill-white" />
-                Trailer
-              </button>
-            )}
-            <button className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-[13px] font-medium text-zinc-400 transition-all hover:bg-white/[0.06] hover:text-white">
-              <Plus className="h-3.5 w-3.5" />
-              Watchlist
+          {synopsisLong && !synopsisExpanded && (
+            <button
+              onClick={() => setSynopsisExpanded(true)}
+              className="mt-0.5 text-[11px] text-zinc-500 underline underline-offset-2 hover:text-zinc-300"
+            >
+              Read more
             </button>
-            <button className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[13px] font-medium text-zinc-500 transition-colors hover:text-white">
-              Details
-              <ExternalLink className="h-3 w-3" />
-            </button>
-          </div>
+          )}
         </div>
       )}
 
-      {hasPoster && (
-        <div className="flex flex-col gap-0 lg:flex-row">
-          {/* Poster — 30% */}
-          <div className="relative w-full lg:w-[30%] lg:min-w-[180px]">
-            <div className="group/poster relative aspect-[2/3] overflow-hidden rounded-l-xl lg:rounded-tr-none">
-              <motion.img
-                src={movie.posterUrl!}
-                alt={`Poster for ${movie.title}`}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover/poster:scale-105"
-                loading="lazy"
-              />
-            </div>
-          </div>
+      {/* Credits with labels */}
+      <div className="flex flex-wrap items-center gap-4">
+        {movie.director && (
+          <span className="text-[12px] text-zinc-400">
+            <span className="text-zinc-600">Director </span>
+            <span className="text-zinc-300">{movie.director.name}</span>
+          </span>
+        )}
+        {movie.leadActor && (
+          <span className="text-[12px] text-zinc-400">
+            <span className="text-zinc-600">Lead </span>
+            <span className="text-zinc-300">{movie.leadActor.name}</span>
+          </span>
+        )}
+        {movie.audience && (
+          <span className="text-[12px] text-zinc-400">
+            <span className="text-zinc-600">Audience </span>
+            <span className="text-zinc-300">{movie.audience}</span>
+          </span>
+        )}
+      </div>
 
-          <div className="flex flex-1 flex-col gap-3 p-5">
-            {/* Title + score — same row */}
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0 space-y-1.5">
-                <h3 className="truncate text-xl font-bold leading-tight tracking-tight text-white md:text-[22px]">
-                  {movie.title}
-                </h3>
-                <div className="flex flex-wrap items-center gap-1.5 text-[13px] text-zinc-400">
-                  <span>{movie.year}</span>
-                  {movie.genres.map((g) => (
-                    <span key={g}>
-                      <span className="text-zinc-600">·</span>
-                      <span>{g}</span>
-                    </span>
-                  ))}
-                  {movie.duration !== 'N/A' && <span><span className="text-zinc-600">·</span> {movie.duration}</span>}
-                  {movie.certification && (
-                    <span className="rounded border border-zinc-700 px-1.5 py-0.5 text-[11px] text-zinc-400">{movie.certification}</span>
-                  )}
-                </div>
-                <ImdbRating rating={movie.imdbRating} votes={movie.imdbVotes} />
-              </div>
-              <MatchScoreBadge score={movie.matchScore} />
-            </div>
-
-            {/* Tags */}
-            {movie.tags && movie.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {movie.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 text-[11px] font-medium text-zinc-300"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Why it matches */}
-            <WhyItMatches
-              reason={movie.reason}
-              details={movie.matchDetails}
-              genre={movie.genres[0]}
-              decade={decade}
-              audience={movie.audience}
-            />
-
-            {/* Synopsis */}
-            <p className="text-[13px] leading-relaxed text-zinc-400">
-              {synopsisExpanded || !synopsisLong ? movie.synopsis : synopsisShort}
-              {synopsisLong && !synopsisExpanded && (
-                <button
-                  onClick={() => setSynopsisExpanded(true)}
-                  className="ml-0.5 text-[12px] text-zinc-500 underline underline-offset-2 hover:text-zinc-300"
-                >
-                  Read more
-                </button>
-              )}
-            </p>
-
-            {/* People */}
-            <div className="flex flex-wrap items-center gap-4">
-              {movie.director && (
-                <span className="flex items-center gap-1.5 text-[13px] text-zinc-400">
-                  <Film className="h-3.5 w-3.5 text-zinc-500" />
-                  {movie.director.name}
-                </span>
-              )}
-              {movie.leadActor && (
-                <span className="flex items-center gap-1.5 text-[13px] text-zinc-400">
-                  <Star className="h-3.5 w-3.5 text-zinc-500" />
-                  {movie.leadActor.name}
-                </span>
-              )}
-              {movie.audience && (
-                <span className="flex items-center gap-1.5 text-[13px] text-zinc-400">
-                  <User className="h-3.5 w-3.5 text-zinc-500" />
-                  {movie.audience}
-                </span>
-              )}
-            </div>
-
-            {/* Action bar */}
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              {movie.trailerUrl ? (
-                <a
-                  href={movie.trailerUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-red-600/90 px-4 py-2 text-[13px] font-medium text-white shadow-md shadow-red-600/15 transition-all hover:bg-red-500"
-                >
-                  <Play className="h-3.5 w-3.5 fill-white" />
-                  Trailer
-                </a>
-              ) : (
-                <button className="inline-flex items-center gap-1.5 rounded-lg bg-red-600/90 px-4 py-2 text-[13px] font-medium text-white shadow-md shadow-red-600/15 transition-all hover:bg-red-500">
-                  <Play className="h-3.5 w-3.5 fill-white" />
-                  Trailer
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </motion.article>
+      {/* Action bar */}
+      <div className="flex flex-wrap items-center gap-2 pt-0.5">
+        {movie.trailerUrl ? (
+          <a
+            href={movie.trailerUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-red-600/90 px-3.5 py-1.5 text-[12px] font-medium text-white shadow-md shadow-red-600/15 transition-all hover:bg-red-500"
+          >
+            <Play className="h-3 w-3 fill-white" />
+            Trailer
+          </a>
+        ) : (
+          <button className="inline-flex items-center gap-1.5 rounded-lg bg-red-600/90 px-3.5 py-1.5 text-[12px] font-medium text-white shadow-md shadow-red-600/15 transition-all hover:bg-red-500">
+            <Play className="h-3 w-3 fill-white" />
+            Trailer
+          </button>
+        )}
+      </div>
+    </div>
   );
 }

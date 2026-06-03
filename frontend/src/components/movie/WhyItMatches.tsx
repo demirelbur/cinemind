@@ -4,51 +4,35 @@ import { Check } from 'lucide-react';
 
 interface WhyItMatchesProps {
   reason: string;
-  details: {
-    genreMatch: boolean;
-    decadeMatch: boolean;
-    audienceFit: boolean;
-    similarity: boolean;
-  };
-  genre?: string;
-  decade?: string;
-  audience?: string;
+  tags?: string[];
 }
 
-export default function WhyItMatches({
-  reason,
-  details,
-  genre,
-  decade,
-  audience,
-}: WhyItMatchesProps) {
-  const { genreMatch, decadeMatch, audienceFit, similarity } = details;
+const MAX_REASON_CHARS = 160;
 
-  const chips = [
-    { label: genre || 'Genre', active: genreMatch },
-    { label: decade || 'Decade', active: decadeMatch },
-    { label: audience || 'Audience', active: audienceFit },
-    { label: 'High similarity', active: similarity },
-  ].filter((c) => c.active);
+export default function WhyItMatches({ reason, tags }: WhyItMatchesProps) {
+  const displayTags = tags?.filter(Boolean).slice(0, 4) || [];
+
+  const reasonLong = reason.length > MAX_REASON_CHARS;
+  const displayReason = reasonLong ? reason.slice(0, reason.lastIndexOf(' ', MAX_REASON_CHARS)) + '…' : reason;
 
   return (
-    <div className="space-y-1.5">
-      {/* Chips first — most scannable info */}
-      {chips.length > 0 && (
+    <div className="rounded-xl border border-zinc-700/50 bg-zinc-900/60 p-3">
+      {displayTags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
-          {chips.map((chip) => (
+          {displayTags.map((tag) => (
             <span
-              key={chip.label}
-              className="inline-flex h-6 items-center gap-1 rounded-full border border-[rgba(34,197,94,0.2)] bg-[rgba(34,197,94,0.08)] px-2.5 text-[11px] font-medium text-green-400"
+              key={tag}
+              className="inline-flex h-5 items-center gap-1 rounded-full border border-[rgba(34,197,94,0.25)] bg-[rgba(34,197,94,0.1)] px-2 text-[11px] font-medium text-green-400"
             >
-              <Check className="h-2.5 w-2.5" />
-              {chip.label}
+              <Check className="h-2 w-2" />
+              {tag}
             </span>
           ))}
         </div>
       )}
-      {/* One-line reason */}
-      <p className="text-[13px] leading-snug text-zinc-400">{reason}</p>
+      <p className="mt-1.5 text-[12px] leading-snug text-zinc-300">
+        {displayReason}
+      </p>
     </div>
   );
 }
