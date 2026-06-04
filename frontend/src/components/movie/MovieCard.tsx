@@ -21,6 +21,19 @@ function truncateSynopsis(text: string, maxWords: number): string {
   return words.slice(0, maxWords).join(' ') + '…';
 }
 
+function formatRuntime(minutes?: number): string | null {
+  if (!minutes) return null;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+}
+
+function capitalize(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 export default function MovieCard({ movie, index }: MovieCardProps) {
   const [synopsisExpanded, setSynopsisExpanded] = useState(false);
   const hasPoster = !!movie.posterUrl;
@@ -123,10 +136,15 @@ function ContentSection({
             {movie.genres.map((g) => (
               <span key={g}>
                 <span className="text-zinc-600">·</span>
-                <span>{g}</span>
+                <span>{capitalize(g)}</span>
               </span>
             ))}
-
+            {formatRuntime(movie.runtimeMinutes) && (
+              <span>
+                <span className="text-zinc-600">·</span>
+                <span>{formatRuntime(movie.runtimeMinutes)}</span>
+              </span>
+            )}
             {movie.certification && (
               <span className="rounded border border-zinc-700 px-1.5 py-0.5 text-[11px] text-zinc-400">
                 {movie.certification}
@@ -205,7 +223,7 @@ function ContentSection({
         {movie.audience && (
           <span className="flex items-center gap-1.5 text-[12px] text-zinc-400">
             <User className="h-3 w-3 text-zinc-500" />
-            <span className="text-zinc-300">{movie.audience}</span>
+            <span className="text-zinc-300">{capitalize(movie.audience)}</span>
           </span>
         )}
       </div>

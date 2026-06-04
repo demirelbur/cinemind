@@ -128,6 +128,7 @@ def _rows_to_movie_records(rows: list[Movie]) -> list[MovieRecord]:
             genre=genre_str,
             year=year,
             rating=rating,
+            runtime_minutes=row.runtime_minutes,
             synopsis=synopsis,
             director=row.director,
             lead_actor=row.lead_actor,

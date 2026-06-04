@@ -43,6 +43,10 @@ class MovieRecord(StrictBaseModel):
         le=10.0,
         description="Average movie rating on a 0.0 to 10.0 scale.",
     )
+    runtime_minutes: int | None = Field(
+        default=None,
+        description="Runtime in minutes.",
+    )
     synopsis: str = Field(
         ...,
         min_length=1,

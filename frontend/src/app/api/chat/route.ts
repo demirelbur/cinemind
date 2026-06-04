@@ -20,6 +20,7 @@ function toMovie(rec: { movie: MovieRecord; reason: string; match_score: number 
     posterUrl: (m.poster_url as string | null) || null,
     backdropUrl: (m.backdrop_url as string | null) || null,
     year: m.year as number,
+    runtimeMinutes: (m.runtime_minutes as number) || undefined,
     genres: (m.genre ? [m.genre] : []) as string[],
     imdbRating: m.rating as number,
     imdbVotes: (m.vote_count as number) || undefined,
