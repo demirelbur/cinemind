@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -10,62 +9,9 @@ import BackgroundGlow from '@/components/layout/BackgroundGlow';
 import ChatInput from '@/components/chat/ChatInput';
 import SuggestedPrompts from '@/components/chat/SuggestedPrompts';
 import MovieCard from '@/components/movie/MovieCard';
-import MovieCardSkeleton from '@/components/movie/MovieCardSkeleton';
+import SearchLoading from '@/components/search/SearchLoading';
 import { sendChatMessage } from '@/lib/api';
-import { mockMovies } from '@/lib/mockMovies';
 import { useChatStore } from '@/store/useChatStore';
-
-const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: false } },
-});
-
-function buildSummary(query: string, count: number): { header: string; body: string } {
-  const q = query.toLowerCase();
-
-  if (q.includes('dark') && q.includes('sci-fi')) {
-    return {
-      header: `Why these ${count} picks?`,
-      body: 'You asked for dark science fiction films. I prioritized atmospheric, moody titles with strong critical reception and themes of existential dread, dystopian settings, or psychological unease.',
-    };
-  }
-  if (q.includes('comedy')) {
-    return {
-      header: `Why these ${count} picks?`,
-      body: 'You asked for comedies. I selected well-reviewed films with varied humor styles — from witty satire to heartfelt stories — focusing on broad audience appeal and standout performances.',
-    };
-  }
-  if (q.includes('horror')) {
-    return {
-      header: `Why these ${count} picks?`,
-      body: 'You asked for horror films. I chose titles that favor atmosphere and dread over cheap jumpscares, prioritizing films with lasting impact and distinctive storytelling.',
-    };
-  }
-  if (q.includes('action')) {
-    return {
-      header: `Why these ${count} picks?`,
-      body: 'You asked for action films. I prioritized high-energy picks with lasting cultural impact and memorable set pieces, balancing mainstream appeal with standout quality.',
-    };
-  }
-  if (q.includes('family')) {
-    return {
-      header: `Why these ${count} picks?`,
-      body: 'You asked for family-friendly picks. I chose warm, engaging films with broad appeal, focusing on stories that resonate across ages while maintaining quality.',
-    };
-  }
-  if (q.includes('underrated')) {
-    return {
-      header: `Why these ${count} picks?`,
-      body: `You asked for underrated films. Less mainstream titles were ranked higher than popular blockbusters, prioritizing critical reception over box office numbers.`,
-    };
-  }
-
-  // Default
-  const genre = q.includes('sci-fi') || q.includes('science fiction') ? 'science fiction' : q.includes('thriller') ? 'thrillers' : q.includes('drama') ? 'dramas' : 'films';
-  return {
-    header: `Why these ${count} picks?`,
-    body: `You asked for ${genre}. I selected critically acclaimed titles that align with your request, ranked by relevance to your query and overall quality.`,
-  };
-}
 
 function CineMindApp() {
   const { messages, isLoading, error, addMessage, setLoading, setError } =
@@ -78,26 +24,13 @@ function CineMindApp() {
       setError(null);
 
       try {
-        const useMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
-
-        if (useMock) {
-          await new Promise((r) => setTimeout(r, 1500));
-          addMessage({
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            content: JSON.stringify(buildSummary(message, mockMovies.length)),
-            movies: mockMovies,
-          });
-        } else {
-          const { movies, answer } = await sendChatMessage(message);
-          const summary = buildSummary(message, movies.length);
-          addMessage({
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            content: JSON.stringify(summary),
-            movies,
-          });
-        }
+        const { movies } = await sendChatMessage(message);
+        addMessage({
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: '',
+          movies,
+        });
       } catch (err) {
         setError(
           err instanceof Error ? err.message : 'Something went wrong. Please try again.',
@@ -113,19 +46,15 @@ function CineMindApp() {
   const latestResult = [...messages].reverse().find(
     (m) => m.role === 'assistant' && m.movies?.length,
   );
-  const hasResults =
-    !isLoading && lastUserMsg && latestResult && latestResult.movies?.length;
 
-  // Parse summary from assistant content
-  let summary: { header: string; body: string } | null = null;
-  if (latestResult) {
-    try {
-      summary = JSON.parse(latestResult.content);
-    } catch {
-      // If not JSON, use it as the body
-      summary = { header: 'Based on your request', body: latestResult.content };
-    }
-  }
+  // Check if the current query was answered with zero results
+  const latestAssistant = lastUserMsg
+    ? messages.slice(messages.indexOf(lastUserMsg)).find((m) => m.role === 'assistant')
+    : null;
+  const currentQueryEmpty = latestAssistant && (!latestAssistant.movies || !latestAssistant.movies.length);
+
+  const hasResults =
+    !isLoading && !error && lastUserMsg && latestResult && latestResult.movies?.length && !currentQueryEmpty;
 
   const showEmptyState = !messages.length && !isLoading;
 
@@ -184,19 +113,21 @@ function CineMindApp() {
         {/* Results */}
         {!showEmptyState && (
           <>
-            {hasResults && summary && (
+            {hasResults && (
               <motion.div
                 key={latestResult!.id}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.06 }}
               >
-                {/* AI ranking explanation */}
+                {/* Result count header */}
                 <div className="mb-5">
                   <h4 className="mb-1.5 text-[15px] font-semibold text-zinc-300">
-                    {summary.header}
+                    {latestResult.movies!.length} result{latestResult.movies!.length === 1 ? '' : 's'} found
                   </h4>
-                  <p className="text-[14px] leading-relaxed text-zinc-400">{summary.body}</p>
+                  <p className="text-[14px] leading-relaxed text-zinc-400">
+                    Ranked by relevance to your query, critical reception, and match confidence.
+                  </p>
                 </div>
 
                 {/* Movie cards */}
@@ -208,13 +139,23 @@ function CineMindApp() {
               </motion.div>
             )}
 
-            {/* Loading skeletons */}
-            {isLoading && lastUserMsg && (
-              <div className="space-y-3">
-                <MovieCardSkeleton index={0} />
-                <MovieCardSkeleton index={1} />
-                <MovieCardSkeleton index={2} />
-              </div>
+            {/* Loading state */}
+            {isLoading && lastUserMsg && <SearchLoading />}
+
+            {/* No results state */}
+            {!isLoading && lastUserMsg && currentQueryEmpty && (
+              <motion.div
+                className="rounded-2xl border border-white/[0.06] bg-zinc-900/30 p-8 text-center"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <p className="text-[15px] font-medium text-zinc-300">
+                  No matching movies found
+                </p>
+                <p className="mt-1.5 text-[14px] text-zinc-500">
+                  Try rephrasing your query or broadening the search.
+                </p>
+              </motion.div>
             )}
           </>
         )}
@@ -235,9 +176,5 @@ function CineMindApp() {
 }
 
 export default function Page() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <CineMindApp />
-    </QueryClientProvider>
-  );
+  return <CineMindApp />;
 }

@@ -25,7 +25,7 @@ export default function AppHeader() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.25 }}
       >
-        Grounded AI movie recommendations
+        Grounded AI-powered movie recommendations
       </motion.p>
     </motion.header>
   );

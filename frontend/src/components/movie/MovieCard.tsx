@@ -126,11 +126,7 @@ function ContentSection({
                 <span>{g}</span>
               </span>
             ))}
-            {movie.duration !== 'N/A' && (
-              <span>
-                <span className="text-zinc-600">·</span> {movie.duration}
-              </span>
-            )}
+
             {movie.certification && (
               <span className="rounded border border-zinc-700 px-1.5 py-0.5 text-[11px] text-zinc-400">
                 {movie.certification}
@@ -214,9 +210,9 @@ function ContentSection({
         )}
       </div>
 
-      {/* Action bar */}
-      <div className="flex flex-wrap items-center gap-2 pt-0.5">
-        {movie.trailerUrl ? (
+      {/* Action bar — only show trailer button when a URL exists */}
+      {movie.trailerUrl && (
+        <div className="flex flex-wrap items-center gap-2 pt-0.5">
           <a
             href={movie.trailerUrl}
             target="_blank"
@@ -226,13 +222,8 @@ function ContentSection({
             <Play className="h-3 w-3 fill-white" />
             Trailer
           </a>
-        ) : (
-          <button className="inline-flex items-center gap-1.5 rounded-lg bg-red-600/90 px-3.5 py-1.5 text-[12px] font-medium text-white shadow-md shadow-red-600/15 transition-all hover:bg-red-500">
-            <Play className="h-3 w-3 fill-white" />
-            Trailer
-          </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
