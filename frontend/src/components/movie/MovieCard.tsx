@@ -131,17 +131,17 @@ function ContentSection({
           <h3 className="truncate text-[17px] font-bold leading-tight tracking-tight text-white md:text-[19px]">
             {movie.title}
           </h3>
-          <div className="flex flex-wrap items-center gap-1.5 text-[12px] text-zinc-400">
+          <div className="flex flex-wrap items-center gap-1 text-[12px] text-zinc-400">
             <span>{movie.year}</span>
             {movie.genres.map((g) => (
-              <span key={g}>
-                <span className="text-zinc-600">·</span>
+              <span key={g} className="flex items-center gap-1">
+                <span className="text-zinc-600">•</span>
                 <span>{capitalize(g)}</span>
               </span>
             ))}
             {formatRuntime(movie.runtimeMinutes) && (
-              <span>
-                <span className="text-zinc-600">·</span>
+              <span className="flex items-center gap-1">
+                <span className="text-zinc-600">•</span>
                 <span>{formatRuntime(movie.runtimeMinutes)}</span>
               </span>
             )}
