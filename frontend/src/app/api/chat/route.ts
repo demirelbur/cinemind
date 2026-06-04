@@ -1,33 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { MovieRecommendation } from '@/lib/types';
 
 type MovieRecord = Record<string, unknown>;
-
-interface MovieRecommendation {
-  id: string;
-  title: string;
-  posterUrl: string | null;
-  backdropUrl: string | null;
-  year: number;
-  genres: string[];
-  certification?: string;
-  imdbRating: number;
-  imdbVotes?: number;
-  matchScore: number;
-  similarity?: number;
-  synopsis: string;
-  reason: string;
-  tags?: string[];
-  matchDetails: {
-    genreMatch: boolean;
-    decadeMatch: boolean;
-    audienceFit: boolean;
-    similarity: boolean;
-  };
-  director?: { name: string };
-  leadActor?: { name: string };
-  audience?: string;
-  trailerUrl?: string;
-}
 
 function slugify(text: string): string {
   return text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
@@ -50,16 +24,9 @@ function toMovie(rec: { movie: MovieRecord; reason: string; match_score: number 
     imdbRating: m.rating as number,
     imdbVotes: (m.vote_count as number) || undefined,
     matchScore: score,
-    similarity: rec.match_score,
     synopsis: m.synopsis as string,
     reason: rec.reason,
     tags: ((m.editorial_tags as string[]) || []).slice(0, 4),
-    matchDetails: {
-      genreMatch: true,
-      decadeMatch: true,
-      audienceFit: !!m.recommended_for,
-      similarity: rec.match_score > 0.6,
-    },
     director: (m.director as string | null) ? { name: m.director as string } : undefined,
     leadActor: actors[0] ? { name: actors[0] } : undefined,
     audience: (m.recommended_for as string) || undefined,

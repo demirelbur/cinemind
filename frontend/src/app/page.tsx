@@ -13,7 +13,7 @@ import SearchLoading from '@/components/search/SearchLoading';
 import { sendChatMessage } from '@/lib/api';
 import { useChatStore } from '@/store/useChatStore';
 
-function CineMindApp() {
+export default function CineMindApp() {
   const { messages, isLoading, error, addMessage, setLoading, setError } =
     useChatStore();
 
@@ -175,6 +175,3 @@ function CineMindApp() {
   );
 }
 
-export default function Page() {
-  return <CineMindApp />;
-}

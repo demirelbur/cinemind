@@ -1,53 +1,20 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:is(.dark *));
-
 @theme inline {
   --font-body: system-ui, -apple-system, sans-serif;
   --color-foreground: var(--foreground);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
   --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --radius: 0.625rem;
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
 }
 
 :root {
   --foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.922 0 0);
-  --radius: 0.625rem;
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
   body {
     font-family: var(--font-body);
     @apply bg-[#08080A] text-foreground text-[17px] leading-[28px];
-  }
-  html {
-    font-family: var(--font-body);
-  }
-  h1 {
-    @apply text-[48px] leading-[56px] font-bold tracking-[-0.02em];
-  }
-  h2 {
-    @apply text-[32px] leading-[40px] font-bold tracking-[-0.015em];
-  }
-  h3 {
-    @apply text-[24px] leading-[32px] font-bold;
-  }
-  h4 {
-    @apply text-[18px] leading-[28px] font-semibold;
   }
 }
 
