@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CineMind — Next.js Frontend
 
-## Getting Started
+Next.js frontend for the CineMind movie recommendation app.
 
-First, run the development server:
+## Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev     # http://localhost:3000
+npm run build   # production build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Architecture
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+src/
+├── app/
+│   ├── page.tsx              # main page: empty state, results, loading, errors
+│   ├── layout.tsx            # root layout, metadata, system UI font
+│   ├── globals.css           # theme tokens, scrollbar, noise texture
+│   └── api/chat/route.ts     # proxy to backend — single transformation layer
+├── components/
+│   ├── chat/
+│   │   ├── ChatInput.tsx             # sticky search input
+│   │   └── SuggestedPrompts.tsx      # clickable example prompt chips
+│   ├── layout/
+│   │   ├── AppHeader.tsx             # CineMind logo + subtitle
+│   │   └── BackgroundGlow.tsx        # ambient background gradient
+│   ├── movie/
+│   │   ├── MovieCard.tsx             # recommendation card (poster + info)
+│   │   ├── WhyItMatches.tsx          # AI reasoning in elevated container
+│   │   ├── ImdbRating.tsx            # star rating with vote count
+│   │   └── MatchScoreBadge.tsx       # percentage match score + label
+│   └── search/
+│       └── SearchLoading.tsx         # progress step indicator (3 steps)
+├── lib/
+│   ├── api.ts                    # thin HTTP caller (axios)
+│   └── types.ts                  # MovieRecommendation, ChatMessage
+└── store/
+    └── useChatStore.ts           # Zustand store (messages, loading, error)
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Data Flow
 
-## Learn More
+Frontend → `/api/chat` (Next.js route) → FastAPI `/recommend` → CineMind backend
 
-To learn more about Next.js, take a look at the following resources:
+The proxy route (`api/chat/route.ts`) is the **single transformation layer** — it fetches raw backend JSON, reshapes it into `MovieRecommendation`, and returns it to the client. `lib/api.ts` is a thin HTTP caller with no transformation logic.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Design Principles
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This frontend follows Lean Product Development (LPD) principles. See the project-level [AGENTS.md](../../AGENTS.md) for the full LPD guidelines.
 
-## Deploy on Vercel
+Key rules applied here:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **One transformation layer** — data is reshaped only in `api/chat/route.ts`
+- **No dead code** — unused components, packages, and CSS are deleted immediately
+- **No stale state** — error and zero-result states never show previous results
+- **Inline before modularizing** — components are extracted only when duplication is painful
+- **Ship over polish** — CSS transitions used over heavy animation libraries where possible

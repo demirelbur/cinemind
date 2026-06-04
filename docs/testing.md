@@ -12,9 +12,17 @@ uv run pytest -m "not llm"
 uv run pytest -m llm -s
 ```
 
-The test campaign is intentionally split into:
+The test suite is split into:
 
-- deterministic schema and wrapper tests
-- live LLM integration tests
+- **Deterministic** — schema validation, retrieval logic, pipeline wrappers (fast, no API calls)
+- **Live LLM** — end-to-end tests that call OpenRouter (tagged `@pytest.mark.llm`)
 
-This keeps testing practical for an LLM-based system.
+## Test files
+
+| File | What it tests |
+|---|---|
+| `test_intent_parser_unit.py` | Monkeypatches `get_intent_parser_agent` factory |
+| `test_intent_parser_integration.py` | Live LLM intent parsing (tagged `llm`) |
+| `test_agent2_integration.py` | Full pipeline with Agent 2 |
+| `test_preferences_schema.py` | ParsedPreferences validation and normalization |
+| `test_recommendation_services.py` | Pipeline service, monkeypatches retrieval |
