@@ -73,6 +73,49 @@ curl -X POST http://localhost:8000/recommend \
 
 > **Critical:** `LLM_MODEL_NAME` must use `provider/model` format. A bare name like `gpt-4o` will cause a startup error.
 
+## Deployment
+
+### Deploy on Hetzner + Cloudflare
+
+1. **Create a Hetzner Cloud Server** — CX23 (2 vCPU, 4 GB RAM, 40 GB NVMe, Ubuntu 24.04)
+2. **Set up Cloudflare DNS** — add A record `cinemind` pointing to your server IP, set proxy to **Proxied** (orange cloud). Set SSL/TLS mode to **Flexible**.
+3. **SSH in and install Docker**
+
+```bash
+ssh root@<your.server.ip>
+apt update && apt upgrade -y
+apt install -y ca-certificates curl gnupg ufw docker.io docker-compose-plugin
+systemctl enable --now docker
+ufw allow OpenSSH && ufw allow 80/tcp && ufw --force enable
+```
+
+4. **Clone, configure, and start**
+
+```bash
+git clone <your-repo-url>
+cd cinemind
+cp .env.example .env
+# Edit .env — set OPENROUTER_API_KEY, DATABASE_URL, TMDB_READ_ACCESS_TOKEN
+chmod 600 .env
+docker compose up -d --build
+```
+
+5. **Enrich movies** (one-time)
+
+```bash
+docker compose exec api python /app/scripts/enrich_movies.py
+```
+
+6. **Verify** — open https://cinemind.burakdemirel.dev
+
+`main` branch includes Nginx reverse proxy for production. Use `develop` branch for local Docker development without Nginx.
+
+### Manual deploy
+
+```bash
+cd /root/cinemind && git pull && docker compose build && docker compose up -d && docker compose logs --tail=50
+```
+
 ## Documentation
 
 - Quickstart: [docs/quickstart.md](docs/quickstart.md)
