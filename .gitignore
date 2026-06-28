@@ -13,8 +13,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+/lib/
+/lib64/
 parts/
 sdist/
 var/
@@ -82,3 +82,7 @@ uv.lock
 # Dataset files (keep local, do not commit)
 data/*
 !data/.gitkeep
+
+# TLS certificates (never commit)
+certs/*.pem
+certs/*.key
